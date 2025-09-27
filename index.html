@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Simple Dynamic Blog</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 2rem;
+    background-color: #f5f5f5;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  #blogPosts > div {
+    background: white;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #ccc;
+  }
+  #blogPosts h2 {
+    margin: 0 0 0.5rem 0;
+  }
+  #blogPosts p {
+    margin: 0.5rem 0;
+  }
+  #postForm {
+    margin-bottom: 2rem;
+  }
+  #postForm input, #postForm textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin: 0.25rem 0 1rem 0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+  }
+  button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.5rem 2rem;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  .delete-btn {
+    background-color: #dc3545;
+    float: right;
+  }
+  .delete-btn:hover {
+    background-color: #a71d2a;
+  }
+  #postDetailModal {
+    display: none;
+    position: fixed;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    box-shadow: 0 0 15px #444;
+    padding: 2rem;
+    border-radius: 5px;
+    max-width: 600px;
+    z-index: 1000;
+  }
+  #postDetailModal h2 {
+    margin-top: 0;
+  }
+  #modalCloseBtn {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #aaa;
+  }
+  #modalCloseBtn:hover {
+    color: #444;
+  }
+  #overlay {
+    position: fixed;
+    display: none;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>My Blog</h1>
+</header>
+
+<form id="postForm">
+  <input type="text" id="postTitle" placeholder="Post Title" required />
+  <textarea id="postContent" rows="5" placeholder="Write your blog post here..." required></textarea>
+  <button type="submit">Add Post</button>
+</form>
+
+<div id="blogPosts"></div>
+
+<div id="overlay"></div>
+<div id="postDetailModal">
+  <button id="modalCloseBtn">&times;</button>
+  <h2 id="detailTitle"></h2>
+  <p id="detailDate"></p>
+  <p id="detailContent"></p>
+</div>
+
+<script>
+  const postForm = document.getElementById('postForm');
+  const blogPosts = document.getElementById('blogPosts');
+  const postDetailModal = document.getElementById('postDetailModal');
+  const detailTitle = document.getElementById('detailTitle');
+  const detailDate = document.getElementById('detailDate');
+  const detailContent = document.getElementById('detailContent');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const overlay = document.getElementById('overlay');
+
+  // Helper function to format date
+  function formatDate(date) {
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  }
+
+  // Create a blog post element and add to the page
+  function addBlogPost(title, content) {
+    const postDiv = document.createElement('div');
+
+    const h2 = document.createElement('h2');
+    h2.textContent = title;
+    h2.style.cursor = 'pointer';
+    h2.addEventListener('click', () => {
+      showPostDetail(title, content, new Date());
+    });
+
+    const datePara = document.createElement('p');
+    datePara.textContent = `Published on: ${formatDate(new Date())}`;
+    datePara.style.fontSize = '0.9em';
+    datePara.style.color = '#666';
+
+    const p = document.createElement('p');
+    p.textContent = content.length > 150 ? content.substring(0, 150) + '...' : content;
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.className = 'delete-btn';
+    deleteBtn.addEventListener('click', () => {
+      blogPosts.removeChild(postDiv);
+    });
+
+    postDiv.appendChild(h2);
+    postDiv.appendChild(deleteBtn);
+    postDiv.appendChild(datePara);
+    postDiv.appendChild(p);
+
+    blogPosts.prepend(postDiv);
+  }
+
+  // Show the detailed post modal
+  function showPostDetail(title, content, date) {
+    detailTitle.textContent = title;
+    detailDate.textContent = `Published on: ${formatDate(date)}`;
+    detailContent.textContent = content;
+    postDetailModal.style.display = 'block';
+    overlay.style.display = 'block';
+  }
+
+  // Close the modal
+  modalCloseBtn.addEventListener('click', () => {
+    postDetailModal.style.display = 'none';
+    overlay.style.display = 'none';
+  });
+
+  overlay.addEventListener('click', () => {
+    postDetailModal.style.display = 'none';
+    overlay.style.display = 'none';
+  });
+
+  // Handle form submission
+  postForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+
+    if(title && content) {
+      addBlogPost(title, content);
+      postForm.reset();
+    }
+  });
+</script>
+
+</body>
+</html>
