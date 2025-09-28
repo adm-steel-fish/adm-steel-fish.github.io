@@ -1,121 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Enhanced Dynamic Blog with Rich Text Editing</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 2rem;
-  }
-  header {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
-  #toolbar button {
-    margin-right: 5px;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    background: #f0f0f0;
-    cursor: pointer;
-    border-radius: 3px;
-  }
-  #toolbar button:hover {
-    background: #ddd;
-  }
-  #editor {
-    border: 1px solid #ccc;
-    padding: 1rem;
-    min-height: 150px;
-    margin-bottom: 1rem;
-    border-radius: 5px;
-  }
-  #blogPosts > div {
-    background: #fafafa;
-    margin-bottom: 1rem;
-    padding: 1rem;
-    border-radius: 5px;
-    box-shadow: 0 0 5px #ccc;
-  }
-  #blogPosts h2 {
-    margin-top: 0;
-  }
-  #blogPosts a {
-    color: #007bff;
-  }
-</style>
-</head>
-<body>
+<html lang="eng">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Basic Tic tac toe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./main.css">
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="title">tic!-tac!!-toe!!!</h2>
+      <button id="replayButton" type="button">Replay</button>
+      <h3 id="winStatus"></h3>
+      <table class="board">
+        <tr>
+          <td><div class="cell-value"></div></td>
+          <td><div class="cell-value"></div></td>
+          <td><div class="cell-value"></div></td>
+        </tr>
+        <tr>
+          <td><div class="cell-value"></div></td>
+          <td><div class="cell-value"></div></td>
+          <td><div class="cell-value"></div></td>
+        </tr>
+        <tr>
+          <td><div class="cell-value"></div></td>
+          <td><div class="cell-value"></div></td>
+          <td><div class="cell-value"></div></td>
+        </tr>
+      </table>
+    </div>
 
-<header>
-  <h1>My Rich Text Blog</h1>
-</header>
-
-<div id="toolbar">
-  <button type="button" onclick="formatText('bold')"><b>B</b></button>
-  <button type="button" onclick="formatText('italic')"><i>I</i></button>
-  <button type="button" onclick="formatText('underline')"><u>U</u></button>
-  <button type="button" onclick="addLink()">Link</button>
-  <button type="button" onclick="addImage()">Image</button>
-  <button type="button" onclick="formatText('insertUnorderedList')">UL</button>
-  <button type="button" onclick="formatText('insertOrderedList')">OL</button>
-</div>
-
-<div id="editor" contenteditable="true" aria-label="Blog post editor" role="textbox" spellcheck="true">
-  Write your blog post here...
-</div>
-
-<button id="submitPost">Add Post</button>
-
-<div id="blogPosts"></div>
-
-<script>
-  const editor = document.getElementById('editor');
-  const blogPosts = document.getElementById('blogPosts');
-
-  function formatText(command) {
-    document.execCommand(command, false, null);
-    editor.focus();
-  }
-
-  function addLink() {
-    const url = prompt('Enter the URL for the link:', 'https://');
-    if (url) {
-      document.execCommand('createLink', false, url);
-    }
-    editor.focus();
-  }
-
-  function addImage() {
-    const imageUrl = prompt('Enter the image URL:', 'https://');
-    if (imageUrl) {
-      document.execCommand('insertImage', false, imageUrl);
-    }
-    editor.focus();
-  }
-
-  document.getElementById('submitPost').addEventListener('click', () => {
-    const content = editor.innerHTML.trim();
-    if(content === '' || content === 'Write your blog post here...') {
-      alert('Please write something before adding a post.');
-      return;
-    }
-
-    const postDiv = document.createElement('div');
-    const postTitle = document.createElement('h2');
-    const postContent = document.createElement('div');
-    const datePara = document.createElement('p');
-
-    // For simplicity, use first 50 characters or "Untitled Post" as title
-    const tempEl = document.createElement('div');
-    tempEl.innerHTML = content;
-    let textContent = tempEl.textContent || tempEl.innerText || '';
-    postTitle.textContent = textContent.substring(0, 50) || 'Untitled Post';
-    postContent.innerHTML = content;
-
-    datePara.textContent = `Published on: ${new Date().toLocaleDateString()}`;
-    datePara.style.fontSize = '0.9em';
-    datePara.style.color = '#666';
-
-    postDiv.appendChild(postTitle);
+    <script src="./index.js"></script>
+  </body>
+</html>
