@@ -91,3 +91,17 @@ const replayGame = () => {
 
 allCells.map(cell => cell.addEventListener('click', () => playGame(cell)));
 replayButton.addEventListener('click', () => replayGame());
+
+
+const homeButton = document.getElementById('homeButton');
+const goHome = () => {
+  allCells.map(cell => cell.innerHTML = '');
+  userFilledCells = [];
+  computerFilledCells = [];
+  winStatus.style.display = 'none';
+  gameOver = false;
+  window.location.href="https://adm-steel-fish.github.io/";
+}
+
+allCells.map(cell => cell.addEventListener('click', () => playGame(cell)));
+homeButton.addEventListener('click', () => goHome());

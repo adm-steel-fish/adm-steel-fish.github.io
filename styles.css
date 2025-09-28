@@ -1,0 +1,92 @@
+:root {
+  --gunmetal: #2C3539;
+  --light-steel: #B0C4DE;
+  --silver: #BFBFBF;
+  --fountain-blue: #6AB7C8;
+  --seaweed-green: #56806F;
+  --brass: #B87333;
+  --white: #F8F8F8;
+}
+
+body {
+  background: var(--light-steel);
+  color: var(--gunmetal);
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: var(--gunmetal);
+  color: var(--white);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--fountain-blue);
+}
+
+nav a {
+  color: var(--white);
+  margin-left: 1.5rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+nav a:hover {
+  color: var(--fountain-blue);
+}
+
+.hero {
+  background: linear-gradient(120deg, var(--light-steel), var(--fountain-blue));
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.hero h1 {
+  color: var(--gunmetal);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero .cta {
+  display: inline-block;
+  margin-top: 1.5rem;
+  background: var(--brass);
+  color: var(--white);
+  padding: 0.8rem 2rem;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+}
+
+.hero .cta:hover {
+  background: var(--seaweed-green);
+}
+
+.about {
+  max-width: 900px;
+  margin: 2rem auto;
+  background: var(--white);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(44, 53, 57, 0.06);
+}
+
+footer {
+  text-align: center;
+  padding: 1.2rem 0;
+  background: var(--gunmetal);
+  color: var(--silver);
+  font-size: 1rem;
+  margin-top: 2rem;
+}
