@@ -1,0 +1,20 @@
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/games/**/Build/*.js.br"
+  [headers.values]
+    Content-Encoding = "br"
+    Content-Type = "application/javascript"
+
+[[headers]]
+  for = "/games/**/Build/*.wasm.br"
+  [headers.values]
+    Content-Encoding = "br"
+    Content-Type = "application/wasm"
+
+[[headers]]
+  for = "/games/**/Build/*.data.br"
+  [headers.values]
+    Content-Encoding = "br"
+    Content-Type = "application/octet-stream"
