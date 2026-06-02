@@ -310,6 +310,21 @@ nav a.nav-active {
   color: var(--seaweed-green);
 }
 
+.latest-news {
+  margin-top: 1.5rem;
+}
+
+.latest-news-card {
+  border-bottom: none;
+  padding: 0.25rem 0 0;
+}
+
+.latest-news h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
 /* ── Article detail page ── */
 
 .article-back {
