@@ -1,0 +1,149 @@
+// To publish a new article:
+//   1. Add a new object at the TOP of this array.
+//   2. Give it the next id, a date ("YYYY-MM-DD"), and optionally a tag.
+//   3. Write your summary (shown in the list) and content (the full article, HTML is supported).
+// The news page sorts by date automatically — newest always appears first.
+
+const NEWS_ARTICLES = [
+  {
+    id: 14,
+    date: "2026-06-02",
+    tag: "Video",
+    title: "Video Demo",
+    summary: "Watch a video demo of our website, where Gabe plays three games online!",
+    content: `<iframe width="560" height="315" 
+      src="https://www.youtube.com/embed/KCWA-qGqu1g?si=hPVLwnMRJjp1A-6P" 
+      title="Video Player" 
+      frameborder="0" 
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+      allowfullscreen
+      loading="lazy">
+  </iframe>
+  <p>Don't forget to subscribe to our YouTube channel!</p>`
+  },
+  {
+    id: 13,
+    date: "2026-06-01",
+    tag: "Event",
+    title: "Steel Fish Studios at Summer Game Fest 2026",
+    summary: "We're thrilled to announce that Steel Fish Studios will have a presence at Summer Game Fest this year. Come find us and be among the first to go hands-on with our upcoming project.",
+    content: `<p>We're thrilled to announce that Steel Fish Studios will have a presence at Summer Game Fest 2026! This is our first time participating at an event of this scale, and we couldn't be more excited to share what we've been building with a wider audience.</p>
+<p>We'll be showcasing our upcoming project alongside a fantastic lineup of indie developers. If you're attending in person, come find us — there will be a playable demo at the booth, and the team will be on hand to chat, answer questions, and geek out about games with you.</p>
+<p>If you're watching from home, we'll be streaming our showcase segment live. Full details on booth location, stream times, and how to follow along will be announced on our social channels in the coming weeks. Stay tuned!</p>`,
+  },
+  {
+    id: 12,
+    date: "2026-05-15",
+    tag: "Dev Update",
+    title: "New Project: First Look at What's Coming",
+    summary: "The team has been hard at work on something new. Today we're pulling back the curtain just a little — here's a first look at the concept art and core mechanics taking shape.",
+    content: `<p>It's been a while since we've hinted at what's next, and today we're finally ready to share a little more. Our new project is currently in early development, and while we're not ready to reveal everything yet, we do want to bring you along for the journey.</p>
+<p>The concept art coming out of the team has been genuinely exciting — expect something with a very different visual tone from anything we've shipped before. The core mechanics are also taking shape in ways we're proud of: approachable on the surface, with more depth underneath for players who want it.</p>
+<p>We'll be sharing more development updates over the coming months. If you want to be the first to see new reveals, make sure you're following us on our socials and keeping an eye on this page!</p>`,
+  },
+  {
+    id: 11,
+    date: "2026-04-20",
+    tag: "Milestone",
+    title: "Smiley Golf Hits 10,000 Plays!",
+    summary: "We just crossed a huge milestone: Smiley Golf has been played over 10,000 times! Thank you to every player who teed up and swung away. This one means a lot to the team.",
+    content: `<p>We just hit a milestone that honestly still feels surreal: Smiley Golf has been played over 10,000 times. When KSteel and GabeTheDeadFish first started building that little mini-golf prototype, none of us imagined it would find this kind of audience.</p>
+<p>Thank you from the bottom of our hearts to every player who picked up the putter and gave it a swing. Your comments, clips, and high-score screenshots have meant the world to the team. We're keeping an eye on your feedback as we think about what's next — so keep it coming!</p>`,
+  },
+  {
+    id: 10,
+    date: "2026-03-10",
+    tag: "Spotlight",
+    title: "Team Spotlight: JustSimy on Directing She Tells Her Story",
+    summary: "We sat down with JustSimy to talk about the creative process behind directing She Tells Her Story, the challenges of narrative game design, and what's next on her horizon.",
+    content: `<p>This month we're shining a spotlight on JustSimy, the director behind <em>She Tells Her Story</em>. We sat down with her to talk about what it's like to lead a narrative game, the creative decisions that shaped the project, and the challenges of telling a story through an interactive medium.</p>
+<p>"Narrative games live and die by the moments between the big beats," JustSimy told us. "I spent a lot of time thinking about what the player is feeling in the quiet parts — the transitions, the silences. Those are just as important as the dramatic choices." It's that kind of thoughtfulness that makes her work stand out, and we're incredibly lucky to have her on the team.</p>
+<p>You can find JustSimy on <a href="https://justsimy.itch.io/" target="_blank">Itch.io</a>, <a href="https://www.twitch.tv/justsimy" target="_blank">Twitch</a>, and her <a href="https://justsimy.com/" target="_blank">personal website</a>. Go show her some love!</p>`,
+  },
+  {
+    id: 9,
+    date: "2026-02-14",
+    tag: "Announcement",
+    title: "Happy Valentine's Day from Steel Fish Studios",
+    summary: "Love is in the air — and so are pixels. We're sharing a little something special for Valentine's Day: a limited-time background pack featuring characters from our games.",
+    content: `<p>Happy Valentine's Day from everyone at Steel Fish Studios! We wanted to do something special for the occasion, so we put together a limited-time background pack featuring characters from across our games — rendered in a warm, illustrated Valentine's style by our amazing artist SketchyRae.</p>
+<p>The pack is free to download through the end of February. Whether you use it as a desktop wallpaper, a phone background, or just want to save it as a keepsake, it's our little gift to the community. Grab it from our <a href="https://linktr.ee/steelfishstudiosllc" target="_blank">Linktree</a> and share your favorites with us online!</p>`,
+  },
+  {
+    id: 8,
+    date: "2026-01-01",
+    tag: "Announcement",
+    title: "New Year, New Goals: 2026 Roadmap",
+    summary: "As we kick off 2026, we want to share where Steel Fish Studios is headed this year. New games, new team members, and new ambitions are all on the docket.",
+    content: `<p>Happy New Year! As 2026 kicks off, we want to be open with our community about where Steel Fish Studios is headed. Transparency matters to us, and we'd rather share our goals publicly — even if some of them are ambitious.</p>
+<p>This year our focus falls into three areas: shipping our next game, growing the team with the right collaborators, and doing more to engage directly with the players who have supported us. We also want to be more consistent about updating this news page, so expect to hear from us more regularly.</p>
+<p>We're not ready to share a release date for the new project yet, but we're targeting sometime in the second half of the year. There will be plenty of dev updates between now and then. Here's to 2026 — let's make it a great one.</p>`,
+  },
+  {
+    id: 7,
+    date: "2025-12-20",
+    tag: "Event",
+    title: "Holiday Game Jam Results Are In",
+    summary: "Our internal holiday game jam wrapped up last week and the results were incredible. Four prototypes were submitted — here's a roundup of what the team built over the weekend.",
+    content: `<p>Our very first internal holiday game jam is officially in the books, and wow — what a weekend. The team had 48 hours to build a playable prototype around a secret theme that was revealed Friday evening. Four submissions came in, ranging from a cozy city-builder to a surprisingly tense rhythm game.</p>
+<p>We'll be sharing short write-ups on each prototype over the coming weeks. Some of these ideas are too good to stay in the jam folder forever — so keep an eye out to see if any of them turn into something bigger.</p>
+<p>A huge thank-you to everyone who participated. Running a game jam inside the studio is something we'd been talking about for a long time, and the results exceeded expectations. We're already planning the next one.</p>`,
+  },
+  {
+    id: 6,
+    date: "2025-11-05",
+    tag: "Release",
+    title: "Photomaze v1.1 — Accessibility & Polish Update",
+    summary: "We've shipped a meaningful update to Photomaze: improved contrast ratios, keyboard navigation support, and a handful of bug fixes based on player feedback. Go check it out!",
+    content: `<p>Photomaze has been updated to version 1.1, and this one is all about accessibility and polish. After reading player feedback carefully over the past few months, it was clear there were some barriers we needed to address.</p>
+<p>The update improves contrast ratios throughout the game to meet WCAG AA standards, adds full keyboard navigation support so you no longer need a mouse to progress, and fixes a handful of visual bugs reported by the community. The experience should feel noticeably smoother from start to finish.</p>
+<p>If you ran into any issues with the original version, we'd love for you to give it another try. And as always, keep the feedback coming — it's how we know what to work on next.</p>`,
+  },
+  {
+    id: 5,
+    date: "2025-10-15",
+    tag: "Release",
+    title: "Freezerie Gets a Halloween Skin",
+    summary: "Spooky season has arrived in Freezerie! Log in this month to unlock a limited Halloween theme with pumpkin decorations, new sound effects, and a haunted high-score board.",
+    content: `<p>Spooky season is officially in full effect at Freezerie! This October, the game has a limited Halloween makeover: pumpkin lanterns dot the background, the soundtrack has a haunted remix layer, and the high-score board has been replaced with a "Most Haunted" leaderboard for the month.</p>
+<p>The Halloween skin is live now and will run through October 31st. After that, the original look returns — so enjoy it while you can! Share your scores with us on social media using <strong>#FreezerieFrights</strong>.</p>`,
+  },
+  {
+    id: 4,
+    date: "2025-09-01",
+    tag: "Announcement",
+    title: "Welcome to the Team: 5RH and Joury",
+    summary: "Steel Fish Studios is growing! We're excited to introduce our two newest members: 5RH joins as a programmer and Joury steps in as production assistant. Welcome aboard!",
+    content: `<p>Steel Fish Studios keeps growing, and we couldn't be more excited about it. This month we're welcoming two new members to the team: 5RH joins us as a programmer, and Joury steps in as our production assistant.</p>
+<p>5RH brings a sharp eye for game systems and a passion for game feel — the kind of attention to detail that shows up in every small interaction. Joury brings organizational energy and a knack for keeping projects on track without slowing creativity down. Both are already making an impact. Welcome aboard, you two!</p>`,
+  },
+  {
+    id: 3,
+    date: "2025-07-04",
+    tag: "Event",
+    title: "Independence Day Stream Recap",
+    summary: "We spent July 4th playing games with the community on stream — and what a time it was. Highlights, clips, and a huge thank-you to everyone who joined us are all inside.",
+    content: `<p>We spent our Fourth of July streaming games with the community, and it turned into one of the most fun sessions we've had all year. The chat was lively, the games were chaotic, and we somehow managed two full playthroughs in one sitting.</p>
+<p>Highlights from the stream are clipped and archived on our channel — go check them out if you missed it. A massive thank-you to everyone who tuned in, hung out in chat, and made the night feel like a real community event. We'll absolutely be doing more of these.</p>`,
+  },
+  {
+    id: 2,
+    date: "2025-06-15",
+    tag: "Dev Update",
+    title: "What We Took Away from This Year's Showcases",
+    summary: "The team watched a lot of game showcases this summer. Here's our honest reaction — the trends we found exciting, the mechanics we want to experiment with, and what inspired us most.",
+    content: `<p>It's been a busy few weeks of game showcases, and the team has been watching everything closely. As developers, there's always a mix of emotions watching other studios present their work — inspiration, excitement, and the occasional pang of "why didn't we think of that."</p>
+<p>A few things stood out to us this year. We saw several games leaning into environmental storytelling in ways that felt fresh, and more than a handful of smaller studios showed off mechanics we genuinely want to experiment with. Procedural generation used with restraint, cooperative puzzle design, and a renewed interest in games that respect the player's time were all recurring themes.</p>
+<p>More than anything, the showcases reminded us why we make games. The indie space is full of people taking real creative risks, and being a part of that community — even at our small scale — is something we're grateful for every day.</p>`,
+  },
+  {
+    id: 1,
+    date: "2025-05-01",
+    tag: "Announcement",
+    title: "Steel Fish Studios Turns Two",
+    summary: "Two years ago, KSteel and GabeTheDeadFish started building games together online. Today we look back at everything that's happened since — and share our excitement for what's ahead.",
+    content: `<p>Two years ago, KSteel and GabeTheDeadFish started building games together from their respective corners of the internet. They met on Discord, realized they had compatible visions and complementary skills, and decided to make something. Steel Fish Studios was born.</p>
+<p>A lot has happened since then. We shipped Freezerie, Photomaze, and Smiley Golf. We brought on an incredible team of artists, programmers, and collaborators who believe in what we're building. We grew a small but genuinely warm community of players who have been with us along the way.</p>
+<p>None of it was inevitable. We're grateful for every person who played our games, shared them with friends, left a comment, or just stopped by to say hello. The next two years are going to be even bigger. Thank you for being here for it.</p>`,
+  },
+];

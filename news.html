@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News — Steel Fish Studios</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">STEEL FISH STUDIOS</div>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./games.html">Games</a>
+      <a href="./about.html">About</a>
+      <a href="./news.html" class="nav-active">News</a>
+      <a href="https://linktr.ee/steelfishstudiosllc">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <section class="about news-section">
+      <h1>News</h1>
+      <p class="news-lead">The latest from Steel Fish Studios</p>
+
+      <div class="news-controls">
+        <label for="per-page">Show</label>
+        <select id="per-page">
+          <option value="5">5</option>
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+        </select>
+        <span>articles per page</span>
+      </div>
+
+      <div id="news-list"></div>
+      <nav id="news-pagination" class="pagination" aria-label="News pagination"></nav>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 Steel Fish Studios. All rights reserved.
+  </footer>
+  <script src="news-data.js"></script>
+  <script src="news.js"></script>
+</body>
+</html>
