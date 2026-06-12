@@ -380,6 +380,17 @@ nav a.nav-active {
   font-style: italic;
 }
 
+.article-body iframe,
+.article-body video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  margin: 0 0 1rem 0;
+  border-radius: 6px;
+}
+
 .news-article-thumbnail {
   display: block;
   width: 100%;
@@ -606,6 +617,14 @@ nav a.nav-active {
 .rte-content iframe {
   max-width: 100%;
   cursor: pointer;
+}
+
+.rte-content iframe,
+.rte-content video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
 }
 
 .rte-content img:hover,
