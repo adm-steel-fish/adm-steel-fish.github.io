@@ -605,6 +605,13 @@ nav a.nav-active {
 .rte-content video,
 .rte-content iframe {
   max-width: 100%;
+  cursor: pointer;
+}
+
+.rte-content img:hover,
+.rte-content video:hover,
+.rte-content iframe:hover {
+  outline: 2px dashed var(--fountain-blue);
 }
 
 .rte-content p {

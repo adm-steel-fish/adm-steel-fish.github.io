@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 16,
+    date: "2026-06-12",
+    tag: "Opinion",
+    thumbnail: "https://assets-global.website-files.com/643c911744135ae6cc4cd930/645888914a236726dba206db_SGF_23_thumb.jpg",
+    title: "What do Steel Fish's founders think of this year's game announcements?",
+    summary: "Angel and Mark (a.k.a. GabeTheDeadFish and KSteel) discuss what new game announcements excited them the most this year.",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/z_-rqmCe6GQ\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 15,
     date: "2026-06-12",
     thumbnail: "https://assets-global.website-files.com/643c911744135ae6cc4cd930/645888914a236726dba206db_SGF_23_thumb.jpg",

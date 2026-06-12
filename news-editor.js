@@ -195,6 +195,19 @@
   contentEditable.addEventListener('mouseup', rememberSelection);
   contentEditable.addEventListener('blur', rememberSelection);
 
+  // Clicking an image/video/iframe selects it as a whole, so Backspace/Delete removes it.
+  contentEditable.addEventListener('click', (e) => {
+    const target = e.target;
+    if (target.tagName === 'IMG' || target.tagName === 'VIDEO' || target.tagName === 'IFRAME') {
+      const range = document.createRange();
+      range.selectNode(target);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      rememberSelection();
+    }
+  });
+
   function restoreSelection() {
     contentEditable.focus();
     const sel = window.getSelection();
@@ -259,9 +272,11 @@
     let watchMatch = url.match(/[?&]v=([^&]+)/);
     let shortMatch = url.match(/youtu\.be\/([^?&]+)/);
     let embedMatch = url.match(/youtube\.com\/embed\/([^?&]+)/);
+    let shortsMatch = url.match(/youtube\.com\/shorts\/([^?&]+)/);
     if (watchMatch) id = watchMatch[1];
     else if (shortMatch) id = shortMatch[1];
     else if (embedMatch) id = embedMatch[1];
+    else if (shortsMatch) id = shortsMatch[1];
     return id ? 'https://www.youtube.com/embed/' + id : null;
   }
 
