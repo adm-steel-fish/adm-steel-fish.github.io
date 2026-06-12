@@ -34,6 +34,9 @@
       const el = document.createElement('article');
       el.className = 'news-article';
       el.innerHTML =
+        (article.thumbnail
+          ? '<img class="news-article-thumbnail" src="' + article.thumbnail + '" alt="">'
+          : '') +
         '<div class="news-article-meta">' +
           (article.tag ? '<span class="news-article-tag">' + article.tag + '</span>' : '') +
           '<span class="news-article-date">' + formatDate(article.date) + '</span>' +

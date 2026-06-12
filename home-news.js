@@ -21,6 +21,9 @@
 
   container.innerHTML =
     '<article class="news-article latest-news-card">' +
+      (latestArticle.thumbnail
+        ? '<img class="news-article-thumbnail" src="' + latestArticle.thumbnail + '" alt="">'
+        : '') +
       '<div class="news-article-meta">' +
         (latestArticle.tag ? '<span class="news-article-tag">' + latestArticle.tag + '</span>' : '') +
         '<span class="news-article-date">' + formatDate(latestArticle.date) + '</span>' +

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Editor — Steel Fish Studios</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="logo">STEEL FISH STUDIOS</div>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./games.html">Games</a>
+      <a href="./about.html">About</a>
+      <a href="./news.html">News</a>
+      <a href="https://linktr.ee/steelfishstudiosllc">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <section class="about editor-section">
+      <h1>News Editor</h1>
+      <p class="news-lead">Create and edit articles for the News page.</p>
+
+      <div id="unsupported-msg" class="editor-unsupported" hidden>
+        <p>This editor needs a Chromium-based browser (Chrome or Edge) because it saves files directly to your computer.</p>
+      </div>
+
+      <div id="setup" class="editor-setup">
+        <div class="editor-setup-step">
+          <button type="button" id="load-data-btn" class="editor-btn">Open news-data.js to begin</button>
+          <span id="data-status" class="editor-status"></span>
+        </div>
+        <p class="editor-hint">Your browser will ask you to pick the <code>news-data.js</code> file once. After that, Save writes straight back to it.</p>
+      </div>
+
+      <form id="editor-form" class="editor-form" hidden>
+        <label class="editor-field">
+          <span>Article</span>
+          <select id="article-select"></select>
+        </label>
+
+        <label class="editor-field">
+          <span>Title</span>
+          <input type="text" id="field-title" placeholder="Article title">
+        </label>
+
+        <label class="editor-field">
+          <span>Tag (optional)</span>
+          <input type="text" id="field-tag" placeholder="e.g. Announcement, Dev Update, Release">
+        </label>
+
+        <label class="editor-field">
+          <span>Date</span>
+          <input type="text" id="field-date" disabled>
+        </label>
+
+        <div class="editor-field">
+          <span>Thumbnail (optional)</span>
+          <div class="thumbnail-control">
+            <div class="thumbnail-preview-wrap">
+              <img id="thumbnail-preview" class="thumbnail-preview" alt="Thumbnail preview" hidden>
+              <span id="thumbnail-empty" class="thumbnail-empty">No thumbnail</span>
+            </div>
+            <div class="thumbnail-buttons">
+              <label class="file-btn editor-btn">Upload image
+                <input type="file" id="thumbnail-file" accept="image/*" hidden>
+              </label>
+              <button type="button" id="thumbnail-link-btn" class="editor-btn">Use image link</button>
+              <button type="button" id="thumbnail-remove-btn" class="editor-btn">Remove</button>
+            </div>
+          </div>
+          <p class="editor-hint">"Upload image" lets you pick any file from your computer. You'll then be asked where to save a copy — choose the <code>images/news</code> folder of this project so it shows up correctly on the site.</p>
+        </div>
+
+        <label class="editor-field">
+          <span>Summary</span>
+          <textarea id="field-summary" rows="3" placeholder="Short summary shown in the news list"></textarea>
+        </label>
+
+        <div class="editor-field">
+          <span>Content</span>
+          <div class="rte">
+            <div class="rte-toolbar" role="toolbar" aria-label="Formatting">
+              <button type="button" class="rte-btn" data-cmd="bold" title="Bold"><b>B</b></button>
+              <button type="button" class="rte-btn" data-cmd="italic" title="Italic"><i>I</i></button>
+              <button type="button" class="rte-btn" data-cmd="formatBlock" data-value="h3" title="Heading">H</button>
+              <button type="button" class="rte-btn" data-cmd="formatBlock" data-value="p" title="Paragraph">¶</button>
+              <button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">• List</button>
+              <button type="button" class="rte-btn" data-cmd="insertOrderedList" title="Numbered list">1. List</button>
+              <span class="rte-sep"></span>
+              <button type="button" id="rte-link-btn" class="rte-btn" title="Insert link">Link</button>
+              <span class="rte-sep"></span>
+              <label class="file-btn rte-btn" title="Upload image">Image
+                <input type="file" id="rte-image-file" accept="image/*" hidden>
+              </label>
+              <button type="button" id="rte-image-link-btn" class="rte-btn" title="Embed image link">Image link</button>
+              <span class="rte-sep"></span>
+              <label class="file-btn rte-btn" title="Upload video">Video
+                <input type="file" id="rte-video-file" accept="video/*" hidden>
+              </label>
+              <button type="button" id="rte-video-link-btn" class="rte-btn" title="Embed video link (e.g. YouTube)">Video link</button>
+            </div>
+            <div id="content-editable" class="rte-content" contenteditable="true"></div>
+          </div>
+          <p class="editor-hint">"Image" and "Video" let you pick a file from anywhere on your computer, then save a copy into this project's <code>images/news</code> folder so it displays correctly on the site.</p>
+        </div>
+
+        <div class="editor-actions">
+          <button type="button" id="save-btn" class="editor-btn editor-btn-primary">Save</button>
+          <span id="save-status" class="editor-status"></span>
+        </div>
+      </form>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 Steel Fish Studios. All rights reserved.
+  </footer>
+  <script src="news-editor.js"></script>
+</body>
+</html>

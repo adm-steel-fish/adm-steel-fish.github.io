@@ -20,6 +20,9 @@
 
   container.innerHTML =
     '<a class="article-back" href="./news.html">← Back to News</a>' +
+    (article.thumbnail
+      ? '<img class="news-article-thumbnail" src="' + article.thumbnail + '" alt="" style="margin-top:1.25rem">'
+      : '') +
     '<div class="news-article-meta" style="margin-top:1.25rem">' +
       (article.tag ? '<span class="news-article-tag">' + article.tag + '</span>' : '') +
       '<span class="news-article-date">' + formatDate(article.date) + '</span>' +

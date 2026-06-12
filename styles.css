@@ -380,6 +380,243 @@ nav a.nav-active {
   font-style: italic;
 }
 
+.news-article-thumbnail {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+/* ── News Editor page ── */
+
+.editor-section {
+  max-width: 800px;
+}
+
+.editor-unsupported {
+  background: #fdecea;
+  border: 1px solid #f5c2bb;
+  border-radius: 6px;
+  padding: 1rem;
+  color: #7a2c20;
+}
+
+.editor-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.editor-setup-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.editor-btn {
+  background: var(--white);
+  border: 1px solid rgba(44, 53, 57, 0.2);
+  color: var(--gunmetal);
+  padding: 0.5rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.editor-btn:hover:not(:disabled) {
+  background: var(--fountain-blue);
+  color: var(--white);
+  border-color: var(--fountain-blue);
+}
+
+.editor-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.editor-btn-primary {
+  background: var(--brass);
+  color: var(--white);
+  border-color: var(--brass);
+  font-weight: 600;
+}
+
+.editor-btn-primary:hover {
+  background: var(--seaweed-green);
+  border-color: var(--seaweed-green);
+}
+
+.editor-status {
+  font-size: 0.85rem;
+  color: #45545c;
+}
+
+.editor-hint {
+  margin: 0.4rem 0 0 0;
+  font-size: 0.8rem;
+  color: #6a7780;
+  font-style: italic;
+}
+
+.editor-hint code {
+  font-style: normal;
+  background: #f0f0f0;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+}
+
+.editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.editor-field > span {
+  font-weight: 600;
+  color: var(--gunmetal);
+}
+
+.editor-field input[type="text"],
+.editor-field select,
+.editor-field textarea {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--silver);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--gunmetal);
+  background: var(--white);
+}
+
+.editor-field input[disabled] {
+  background: #f0f0f0;
+  color: #6a7780;
+}
+
+.editor-field textarea {
+  resize: vertical;
+}
+
+.thumbnail-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.thumbnail-preview-wrap {
+  width: 160px;
+  height: 100px;
+  border: 1px dashed var(--silver);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f6f6f6;
+  flex-shrink: 0;
+}
+
+.thumbnail-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-empty {
+  font-size: 0.8rem;
+  color: #8a96a0;
+  font-style: italic;
+}
+
+.thumbnail-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.file-btn {
+  display: inline-block;
+  text-align: center;
+}
+
+.rte {
+  border: 1px solid var(--silver);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  background: #f6f6f6;
+  border-bottom: 1px solid var(--silver);
+  align-items: center;
+}
+
+.rte-btn {
+  background: var(--white);
+  border: 1px solid rgba(44, 53, 57, 0.2);
+  color: var(--gunmetal);
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.rte-btn:hover {
+  background: var(--fountain-blue);
+  color: var(--white);
+  border-color: var(--fountain-blue);
+}
+
+.rte-sep {
+  width: 1px;
+  height: 1.4rem;
+  background: var(--silver);
+  margin: 0 0.2rem;
+}
+
+.rte-content {
+  min-height: 220px;
+  padding: 0.9rem;
+  outline: none;
+  line-height: 1.75;
+  color: #34474f;
+}
+
+.rte-content img,
+.rte-content video,
+.rte-content iframe {
+  max-width: 100%;
+}
+
+.rte-content p {
+  margin: 0 0 1rem 0;
+}
+
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 @media (max-width: 700px) {
   header {
     flex-direction: column;
