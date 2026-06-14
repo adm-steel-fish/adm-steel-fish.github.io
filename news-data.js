@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 17,
+    date: "2026-06-14",
+    tag: "video",
+    thumbnail: "https://i.ytimg.com/an_webp/fg-d6BXiAsY/mqdefault_6s.webp?du=3000&sqp=CJbvu9EG&rs=AOn4CLCG-gx_USOoSt3vfwc8-E0Y-McsPA",
+    title: "Rjay64 plays Adventures of Helio!",
+    summary: "Rjay64 plays Adventures of Helio for 10 minutes and gives his thoughts on it.",
+    content: "<span data-offset-key=\"aq0dv-0-0\" style=\"color: rgb(231, 233, 234); font-family: TwitterChirp, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif; font-size: 20px; white-space: pre-wrap; background-color: rgb(20, 20, 20);\"><span data-text=\"true\"><br><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/fg-d6BXiAsY\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></span></span>",
+  },
+  {
     id: 16,
     date: "2026-06-12",
     tag: "Opinion",
