@@ -31,8 +31,9 @@
     </section>
   </main>
   <footer>
-    &copy; 2025 Steel Fish Studios. All rights reserved.
+    &copy; <span id="copyright-year"></span> Steel Fish Studios. All rights reserved.
   </footer>
+  <script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
   <script src="news-data.js"></script>
   <script src="news-article.js"></script>
 </body>
