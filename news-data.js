@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 18,
+    date: "2026-06-15",
+    tag: "Game Dev",
+    thumbnail: "https://i.ytimg.com/an_webp/vSulV6LLfLY/mqdefault_6s.webp?du=3000&sqp=CNqOwdEG&rs=AOn4CLA4DuuBDMxU4UJCPKkwrWjHxQG59A",
+    title: "Wild West Metal Gear concept",
+    summary: "Check out Mark's new prototype! He's making a Wild West NES game using NES Metal Gear and Snake's Revenge as references, with his goal being to improve and expand upon these games directly the best he could to create a comprehensive adventure game.",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/AvldVt53vYo\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe><div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/vSulV6LLfLY\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></div>",
+  },
+  {
     id: 17,
     date: "2026-06-14",
     tag: "video",
