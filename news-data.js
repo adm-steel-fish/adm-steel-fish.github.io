@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 19,
+    date: "2026-06-17",
+    tag: "Event",
+    thumbnail: "https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=1,background=white,quality=75,width=400,height=400/uploads/uj/560163d9-b996-422f-af52-c24705576266.png",
+    title: "Tampa Bay Game Developers - Social/Mixer - June 2026",
+    summary: "If you make games, want to make games, or just love talking shop about design, art, code, audio, storytelling, and the strange magic of getting an idea onto a screen. Come hang out for a fun, low-pressure evening with local game creators, gaming fans, and curious newcomers.",
+    content: "<div>Gabe, one of the co-founders of Steel Fish Studios, will be going to this event! He can't wait to meet fellow devleopers and connect!</div><div>If you're interested,&nbsp;<a href=\"https://luma.com/tcm3mys8?tk=J7Tkw8\" target=\"_blank\">click here to register!</a></div>",
+  },
+  {
     id: 18,
     date: "2026-06-15",
     tag: "Game Dev",
