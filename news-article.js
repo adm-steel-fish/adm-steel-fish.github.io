@@ -3,7 +3,7 @@
   const id = parseInt(params.get('id'), 10);
   const article = NEWS_ARTICLES.find(function (a) { return a.id === id; });
   const container = document.getElementById('article-container');
-  const STORAGE_KEY = 'comments_article_' + id;
+  const API = '/api/comments?id=' + id;
 
   function formatDate(iso) {
     const d = new Date(iso + 'T00:00:00');
@@ -16,18 +16,6 @@
       ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   }
 
-  function loadComments() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    } catch (e) {
-      return [];
-    }
-  }
-
-  function saveComments(comments) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-  }
-
   function escapeHtml(str) {
     return str
       .replace(/&/g, '&amp;')
@@ -37,7 +25,7 @@
   }
 
   function renderComments(comments, listEl) {
-    if (comments.length === 0) {
+    if (!comments.length) {
       listEl.innerHTML = '<p class="comments-empty">No comments yet. Be the first!</p>';
       return;
     }
@@ -50,6 +38,16 @@
         '<p class="comment-text">' + escapeHtml(c.text) + '</p>' +
       '</div>';
     }).join('');
+  }
+
+  function fetchComments(listEl) {
+    listEl.innerHTML = '<p class="comments-empty">Loading comments…</p>';
+    fetch(API)
+      .then(function (r) { return r.json(); })
+      .then(function (comments) { renderComments(comments, listEl); })
+      .catch(function () {
+        listEl.innerHTML = '<p class="comments-empty">Could not load comments.</p>';
+      });
   }
 
   if (!article) {
@@ -80,29 +78,48 @@
           '<input type="text" id="comment-name" class="comment-input" placeholder="Anonymous" maxlength="80" autocomplete="off">' +
         '</div>' +
         '<div class="comment-form-row">' +
-          '<textarea id="comment-text" class="comment-textarea" placeholder="Write a comment..." maxlength="2000" rows="4"></textarea>' +
+          '<textarea id="comment-text" class="comment-textarea" placeholder="Write a comment…" maxlength="2000" rows="4"></textarea>' +
         '</div>' +
         '<button type="submit" class="comment-submit">Post Comment</button>' +
       '</form>' +
     '</section>';
 
-  const comments = loadComments();
   const listEl = document.getElementById('comments-list');
-  renderComments(comments, listEl);
+  fetchComments(listEl);
 
   document.getElementById('comment-form').addEventListener('submit', function (e) {
     e.preventDefault();
     const nameInput = document.getElementById('comment-name');
     const textInput = document.getElementById('comment-text');
+    const submitBtn = document.querySelector('.comment-submit');
     const text = textInput.value.trim();
     if (!text) return;
     const name = nameInput.value.trim() || 'Anonymous';
-    const updated = loadComments();
-    updated.push({ name: name, text: text, datetime: new Date().toISOString() });
-    saveComments(updated);
-    renderComments(updated, listEl);
-    nameInput.value = '';
-    textInput.value = '';
-    listEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Posting…';
+
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, text: text }),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('Server error');
+        return r.json();
+      })
+      .then(function (updated) {
+        renderComments(updated, listEl);
+        nameInput.value = '';
+        textInput.value = '';
+        listEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      })
+      .catch(function () {
+        alert('Failed to post comment. Please try again.');
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Comment';
+      });
   });
 })();
