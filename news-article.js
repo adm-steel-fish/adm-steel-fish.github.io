@@ -1,62 +1,77 @@
-(function () {
-  const params = new URLSearchParams(window.location.search);
-  const id = parseInt(params.get('id'), 10);
-  const article = NEWS_ARTICLES.find(function (a) { return a.id === id; });
-  const container = document.getElementById('article-container');
-  const API = '/api/comments?id=' + id;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-  function formatDate(iso) {
-    const d = new Date(iso + 'T00:00:00');
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
+const firebaseConfig = {
+  apiKey: "AIzaSyCM7alZkeWOEsNnp5fmza4t_dYdEz2H77M",
+  authDomain: "steel-fish-studios.firebaseapp.com",
+  projectId: "steel-fish-studios",
+  storageBucket: "steel-fish-studios.firebasestorage.app",
+  messagingSenderId: "655779279882",
+  appId: "1:655779279882:web:587ad0f2ccb8c5ecefdbf3"
+};
 
-  function formatCommentDate(isoString) {
-    const d = new Date(isoString);
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) +
-      ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-  }
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  function escapeHtml(str) {
-    return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
+const params = new URLSearchParams(window.location.search);
+const id = parseInt(params.get('id'), 10);
+const article = NEWS_ARTICLES.find(function (a) { return a.id === id; });
+const container = document.getElementById('article-container');
 
-  function renderComments(comments, listEl) {
-    if (!comments.length) {
-      listEl.innerHTML = '<p class="comments-empty">No comments yet. Be the first!</p>';
-      return;
-    }
-    listEl.innerHTML = comments.map(function (c) {
-      return '<div class="comment">' +
-        '<div class="comment-meta">' +
-          '<span class="comment-author">' + escapeHtml(c.name) + '</span>' +
-          '<span class="comment-date">' + formatCommentDate(c.datetime) + '</span>' +
-        '</div>' +
-        '<p class="comment-text">' + escapeHtml(c.text) + '</p>' +
-      '</div>';
-    }).join('');
-  }
+function formatDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
 
-  function fetchComments(listEl) {
-    listEl.innerHTML = '<p class="comments-empty">Loading comments…</p>';
-    fetch(API)
-      .then(function (r) { return r.json(); })
-      .then(function (comments) { renderComments(comments, listEl); })
-      .catch(function () {
-        listEl.innerHTML = '<p class="comments-empty">Could not load comments.</p>';
-      });
-  }
+function formatCommentDate(isoString) {
+  const d = new Date(isoString);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) +
+    ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+}
 
-  if (!article) {
-    container.innerHTML =
-      '<a class="article-back" href="./news.html">← Back to News</a>' +
-      '<p class="news-empty">Article not found.</p>';
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderComments(comments, listEl) {
+  if (!comments.length) {
+    listEl.innerHTML = '<p class="comments-empty">No comments yet. Be the first!</p>';
     return;
   }
+  listEl.innerHTML = comments.map(function (c) {
+    return '<div class="comment">' +
+      '<div class="comment-meta">' +
+        '<span class="comment-author">' + escapeHtml(c.name) + '</span>' +
+        '<span class="comment-date">' + formatCommentDate(c.datetime) + '</span>' +
+      '</div>' +
+      '<p class="comment-text">' + escapeHtml(c.text) + '</p>' +
+    '</div>';
+  }).join('');
+}
 
+async function fetchComments(listEl) {
+  listEl.innerHTML = '<p class="comments-empty">Loading comments…</p>';
+  try {
+    const q = query(
+      collection(db, 'articles', String(id), 'comments'),
+      orderBy('datetime', 'asc')
+    );
+    const snapshot = await getDocs(q);
+    renderComments(snapshot.docs.map(function (d) { return d.data(); }), listEl);
+  } catch (err) {
+    listEl.innerHTML = '<p class="comments-empty">Could not load comments.</p>';
+  }
+}
+
+if (!article) {
+  container.innerHTML =
+    '<a class="article-back" href="./news.html">← Back to News</a>' +
+    '<p class="news-empty">Article not found.</p>';
+} else {
   document.title = article.title + ' — Steel Fish Studios';
 
   container.innerHTML =
@@ -87,7 +102,7 @@
   const listEl = document.getElementById('comments-list');
   fetchComments(listEl);
 
-  document.getElementById('comment-form').addEventListener('submit', function (e) {
+  document.getElementById('comment-form').addEventListener('submit', async function (e) {
     e.preventDefault();
     const nameInput = document.getElementById('comment-name');
     const textInput = document.getElementById('comment-text');
@@ -99,27 +114,21 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Posting…';
 
-    fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, text: text }),
-    })
-      .then(function (r) {
-        if (!r.ok) throw new Error('Server error');
-        return r.json();
-      })
-      .then(function (updated) {
-        renderComments(updated, listEl);
-        nameInput.value = '';
-        textInput.value = '';
-        listEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      })
-      .catch(function () {
-        alert('Failed to post comment. Please try again.');
-      })
-      .finally(function () {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Post Comment';
+    try {
+      await addDoc(collection(db, 'articles', String(id), 'comments'), {
+        name: name,
+        text: text,
+        datetime: new Date().toISOString()
       });
+      nameInput.value = '';
+      textInput.value = '';
+      await fetchComments(listEl);
+      listEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      alert('Failed to post comment. Please try again.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Post Comment';
+    }
   });
-})();
+}
