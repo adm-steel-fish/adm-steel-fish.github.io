@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 20,
+    date: "2026-07-02",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/an_webp/D29ySNOB-nI/mqdefault_6s.webp?du=3000&sqp=CMS-m9IG&rs=AOn4CLAYb5mxG7mOgOdmCIqMjbCh1wlxJw",
+    title: "She Tells Her Story - Leek Minigame WIP",
+    summary: "Can you put ingredients in the pot to make a stew? Don't get distracted!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/D29ySNOB-nI\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 19,
     date: "2026-06-17",
     tag: "Event",
