@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 21,
+    date: "2026-07-05",
+    tag: "Announcement",
+    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8xGLFSNFeumNw-PDUY6_Jm-cKOCblVS7bDHi1uNeUFA&s=10",
+    title: "Steel Fish Design - New YouTube series!",
+    summary: "Check out our new series, Steel Fish Design! In it, we study different video game design techniques.",
+    content: "<b>Save Points</b><br><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/VaTZk2I_ORg\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe><br><div><b>Pre-Rendered Graphics</b><br><div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/4xqMMjA7P8o\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></div><div><br></div><div>Don't forget to subscribe to our YouTube channel!</div></div>",
+  },
+  {
     id: 20,
     date: "2026-07-02",
     tag: "Dev Update",
