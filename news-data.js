@@ -6,6 +6,33 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 24,
+    date: "2026-07-15",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/vi/H45tUOgDp9M/oar2.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&rs=AOn4CLDBc5DYwMab4LzY_muZCrHinee75g&usqp=CCk",
+    title: "Chased by Ghosts in the Dark",
+    summary: "Check out a short horror game we're making on the side!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/H45tUOgDp9M\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
+    id: 23,
+    date: "2026-07-09",
+    tag: "Dev Update",
+    thumbnail: "https://img.itch.zone/aW1nLzI1OTAwOTUyLnBuZw==/315x250%23c/xeL%2F%2Bf.png",
+    title: "Photomaze - Level 2 released",
+    summary: "2nd level of Photomaze is now available to play!",
+    content: "<div>At long last! I uploaded the second level for Photomaze! Try to beat the mazes in as few moves as possible! Be on the lookout for more mazes to be added!</div><div><br></div><div><a href=\"https://steelfishstudios.itch.io/photomaze\" target=\"_blank\">Play Photomaze here!</a></div>",
+  },
+  {
+    id: 22,
+    date: "2026-07-06",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/vi/OhUAydKsaro/oar2.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&rs=AOn4CLA8w5aWNyLUA7Hpp25tfsO7oKvWZQ&usqp=CCk",
+    title: "2D Horror House prototype",
+    summary: "Check out our newest prototype! This video has over 400 views and counting!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/tO_3C9L01lU\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 21,
     date: "2026-07-05",
     tag: "Announcement",
