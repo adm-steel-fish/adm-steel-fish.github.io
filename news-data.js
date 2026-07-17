@@ -6,6 +6,24 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 26,
+    date: "2026-07-17",
+    tag: "Video",
+    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYAneqkg6I1sQYaiGPzAVWKTk-6eiK9YIPKOCVyjtKPQ&s=10",
+    title: "Our Two Cents - First Person Shooters",
+    summary: "What are Gabe and KSteel's favorite first-person shooters? What are yours?",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/2GlZ83TkBIk\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe><div><br></div><div><b>What are your favorite first-person shooters?</b> Leave a comment in this article, or go to the YouTube page for this video and comment there!</div>",
+  },
+  {
+    id: 25,
+    date: "2026-07-16",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/vi/R_JW9Jh2T1I/oar2.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&rs=AOn4CLCX6zdEjk5b7GCypPzE8bkru52NVQ&usqp=CCk",
+    title: "Cowboy Tactical FPS Concept",
+    summary: "Prototype for a first-person shooter set in the wild west!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/R_JW9Jh2T1I\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe><div><br></div><div>What's your favorite game set in the Wild Wild West? Let us know with a comment below!</div>",
+  },
+  {
     id: 24,
     date: "2026-07-15",
     tag: "Dev Update",
