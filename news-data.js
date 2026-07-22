@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 27,
+    date: "2026-07-21",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/an_webp/ZEc2mBrobRk/mqdefault_6s.webp?du=3000&sqp=CK-DgNMG&rs=AOn4CLCgvulyIUsUGZMWEWsshg9wudbopg",
+    title: "Swimming Platformer: Improved Triggerang animation",
+    summary: "The Triggerang is a boomerang-shaped beam of light that can grab enemies!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/ZEc2mBrobRk\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 26,
     date: "2026-07-17",
     tag: "Video",
