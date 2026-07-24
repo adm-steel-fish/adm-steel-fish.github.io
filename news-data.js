@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 28,
+    date: "2026-07-24",
+    tag: "Video",
+    thumbnail: "https://images.thedirect.com/media/article_full/4.jpg",
+    title: "Our Two Cents - Dead Video Game Series",
+    summary: "KSteel and Gabe discuss long-dead video game series they'd love to see return.",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/FwSt3mysIYo\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe><div><br></div><div>Check out our new video! Feel free to give us your own opinions in the comment section!</div>",
+  },
+  {
     id: 27,
     date: "2026-07-21",
     tag: "Dev Update",
