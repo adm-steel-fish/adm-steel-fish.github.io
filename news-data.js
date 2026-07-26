@@ -6,6 +6,24 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 30,
+    date: "2026-07-25",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/an_webp/-h7Pfoeu3Ys/mqdefault_6s.webp?du=3000&sqp=CK2bmdMG&rs=AOn4CLCzwa2xvNS-14Ff48Zmnbt1WUxF3w",
+    title: "Swimming Platformer: Orb-Throwing System WIP",
+    summary: "Pick 'em up! Throw 'em!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/-h7Pfoeu3Ys\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
+    id: 29,
+    date: "2026-07-25",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/vi/4fzEWgikNZ8/oar2.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&rs=AOn4CLCAezOsvOHZfCSQoGOpVQ9ioekiLA&usqp=CCk",
+    title: "Projectile Platformer Prototype",
+    summary: "Watch us turn enemies into platforms!",
+    content: "<div>Have you played Mega Man 5? In that game, there's an arrow you can shoot at walls to make platforms to jump on. This is inspired by that!</div><div><br></div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/4fzEWgikNZ8\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 28,
     date: "2026-07-24",
     tag: "Video",
