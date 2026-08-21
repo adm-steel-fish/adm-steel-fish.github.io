@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 32,
+    date: "2026-08-20",
+    tag: "Announcement",
+    thumbnail: "https://i.ytimg.com/an_webp/m9OWHzUd0Ww/mqdefault_6s.webp?du=3000&sqp=CNCgntQG&rs=AOn4CLAg44aqQ2VpPFmzQwlADwSOao9s5A",
+    title: "She Tells Her Story - \"Trailer\"",
+    summary: "Check out the newest trailer for She Tells Her Story if you haven't already!",
+    content: "<font color=\"oklab(0.952693 0.000792831 -0.00253612)\" face=\"gg sans, Noto Sans, Helvetica Neue, Helvetica, Arial, sans-serif\"><span style=\"white-space-collapse: break-spaces; background-color: oklab(0.780873 0.0514458 0.159034 / 0.0784314);\">Gabe and Simy just released the trailer for She Tells Her Story - full release in 2028 with the Demo out on Steam very soon. Enjoy the trailer!!</span></font><div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/m9OWHzUd0Ww\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></div>",
+  },
+  {
     id: 31,
     date: "2026-08-11",
     tag: "Release",
