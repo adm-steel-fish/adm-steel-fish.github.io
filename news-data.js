@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 33,
+    date: "2026-09-19",
+    tag: "Annoucement",
+    thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXoMFtNYy-gfuvVnQkKSiDAmfYt0ynmaGz55WPNbUPZw&s",
+    title: "We are now on Facebook!",
+    summary: "Follow us on Facebook!",
+    content: "We created a Facebook page this week. Let's hope this helps us to reach more players!<div><br></div><div>If you have a Facebook account,&nbsp;<a href=\"https://www.facebook.com/profile.php?id=61594511278009&amp;notif_id=1789658951942301&amp;notif_t=profile_plus_admin_invite&amp;ref=notif\" target=\"_blank\">check out our page here!</a></div>",
+  },
+  {
     id: 32,
     date: "2026-08-20",
     tag: "Announcement",
