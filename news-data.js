@@ -27,7 +27,7 @@ const NEWS_ARTICLES = [
     id: 30,
     date: "2026-07-25",
     tag: "Dev Update",
-    thumbnail: "https://i.ytimg.com/an_webp/-h7Pfoeu3Ys/mqdefault_6s.webp?du=3000&sqp=CK2bmdMG&rs=AOn4CLCzwa2xvNS-14Ff48Zmnbt1WUxF3w",
+    thumbnail: "https://i.ytimg.com/an_webp/-h7Pfoeu3Ys/mqdefault_6s.webp?du=3000&sqp=CPuRu9UG&rs=AOn4CLAQ8QC3FBfzrBTQmk7ERfr-xfmbZQ",
     title: "Swimming Platformer: Orb-Throwing System WIP",
     summary: "Pick 'em up! Throw 'em!",
     content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/-h7Pfoeu3Ys\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
