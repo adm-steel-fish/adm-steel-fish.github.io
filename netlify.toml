@@ -26,15 +26,15 @@
 # generic card at /images/og-default.jpg.
 [images]
   remote_images = [
-    "https://i\.ytimg\.com/.*",
-    "https://img\.itch\.zone/.*",
-    "https://encrypted-tbn\d\.gstatic\.com/.*",
-    "https://images\.thedirect\.com/.*",
-    "https://images\.lumacdn\.com/.*",
-    "https://assets-global\.website-files\.com/.*",
-    "https://i\.imgur\.com/.*",
-    "https://media\d*\.giphy\.com/.*",
-    "https://media\.tenor\.com/.*",
-    "https://raw\.githubusercontent\.com/.*",
-    "https://.*\.githubusercontent\.com/.*"
+    'https://i\.ytimg\.com/.*',
+    'https://img\.itch\.zone/.*',
+    'https://encrypted-tbn\d\.gstatic\.com/.*',
+    'https://images\.thedirect\.com/.*',
+    'https://images\.lumacdn\.com/.*',
+    'https://assets-global\.website-files\.com/.*',
+    'https://i\.imgur\.com/.*',
+    'https://media\d*\.giphy\.com/.*',
+    'https://media\.tenor\.com/.*',
+    'https://raw\.githubusercontent\.com/.*',
+    'https://.*\.githubusercontent\.com/.*'
   ]
