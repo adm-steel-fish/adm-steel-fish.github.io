@@ -95,6 +95,14 @@ async function resolveSocialImage(thumbnail, pageUrl) {
       : fallback;
   }
 
+  // The Image CDN is preferred for every source: it flattens anything
+  // animated, upscales thumbnails too small for a large card (X wants at
+  // least 300x157), and crops everything to one consistent shape. It only
+  // accepts allow-listed hosts — see [images] in netlify.toml — so an
+  // unlisted host falls back to the original URL.
+  const normalized = imageCdn(origin, src.href);
+  if (await isReachable(normalized)) return card(normalized);
+
   // One probe answers both questions: whether the source loads at all, and —
   // for the many hosts that serve images from extensionless URLs — whether it
   // is a format that might be animated.
@@ -102,12 +110,9 @@ async function resolveSocialImage(thumbnail, pageUrl) {
   const maybeAnimated =
     ANIMATED_EXT.test(src.pathname) || ANIMATED_TYPES.test(probe.type);
 
-  if (probe.ok && !maybeAnimated) {
-    return { url: src.href, width: null, height: null };
-  }
-
-  const flattened = imageCdn(origin, src.href);
-  return (await isReachable(flattened)) ? card(flattened) : fallback;
+  return probe.ok && !maybeAnimated
+    ? { url: src.href, width: null, height: null }
+    : fallback;
 }
 
 // Returns { ok, type } for a URL, or { ok: false, type: "" } if it can't be
