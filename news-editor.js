@@ -17,7 +17,8 @@
   const saveBtn = document.getElementById('save-btn');
   const saveStatus = document.getElementById('save-status');
 
-  let fileHandle = null;
+  let rootDir = null;   // the site folder, granted once up front
+  let fileHandle = null; // news-data.js inside it
   let headerText = '';
   let articles = [];
   let currentArticle = null; // null = new article
@@ -25,7 +26,7 @@
   let currentThumbnail = '';
   let savedRange = null;
 
-  if (!window.showOpenFilePicker || !window.showSaveFilePicker) {
+  if (!window.showDirectoryPicker) {
     unsupportedMsg.hidden = false;
     document.getElementById('editor-form').hidden = true;
     return;
@@ -44,10 +45,12 @@
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
-  function setThumbnail(path) {
+  // previewSrc lets a freshly uploaded file preview from memory: its recorded
+  // path won't resolve until the new image is deployed alongside the article.
+  function setThumbnail(path, previewSrc) {
     currentThumbnail = path || '';
     if (currentThumbnail) {
-      thumbnailPreview.src = currentThumbnail;
+      thumbnailPreview.src = previewSrc || currentThumbnail;
       thumbnailPreview.hidden = false;
       thumbnailEmpty.hidden = true;
     } else {
@@ -114,21 +117,34 @@
 
   loadDataBtn.addEventListener('click', async () => {
     try {
-      const [handle] = await window.showOpenFilePicker({
-        types: [{ description: 'JavaScript file', accept: { 'text/javascript': ['.js'] } }],
-        excludeAcceptAllOption: false,
-      });
-      fileHandle = handle;
-      if ((await fileHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') {
-        await fileHandle.requestPermission({ mode: 'readwrite' });
+      // One readwrite grant on the site folder covers both news-data.js and
+      // the images/news/ folder that uploads are written into, so no other
+      // step needs a file dialog of its own.
+      const dir = await window.showDirectoryPicker({ id: 'sfs-site', mode: 'readwrite' });
+      if ((await dir.queryPermission({ mode: 'readwrite' })) !== 'granted' &&
+          (await dir.requestPermission({ mode: 'readwrite' })) !== 'granted') {
+        dataStatus.textContent = 'Permission to write to that folder was denied.';
+        return;
       }
+
+      try {
+        fileHandle = await dir.getFileHandle('news-data.js');
+      } catch (err) {
+        if (err.name !== 'NotFoundError') throw err;
+        alert('No news-data.js in "' + dir.name + '". Please choose the folder that contains it (the Steel Fish Studios folder itself, not images/ or docs/).');
+        dataStatus.textContent = 'No news-data.js in that folder.';
+        return;
+      }
+      rootDir = dir;
+
       const file = await fileHandle.getFile();
       const text = await file.text();
 
       const marker = 'const NEWS_ARTICLES = [';
       const idx = text.indexOf(marker);
       if (idx === -1) {
-        alert('Could not find "const NEWS_ARTICLES = [" in the selected file. Please make sure you opened news-data.js.');
+        alert('Could not find "const NEWS_ARTICLES = [" in news-data.js.');
+        rootDir = null;
         fileHandle = null;
         return;
       }
@@ -140,25 +156,62 @@
       populateArticleSelect();
       loadArticleIntoForm(null);
       editorForm.hidden = false;
-      dataStatus.textContent = 'Loaded ' + articles.length + ' article(s) from ' + fileHandle.name + '.';
+      dataStatus.textContent = 'Loaded ' + articles.length + ' article(s) from ' + dir.name + '/news-data.js.';
     } catch (err) {
       if (err.name !== 'AbortError') {
-        alert('Error opening news-data.js: ' + err.message);
+        alert('Error opening the site folder: ' + err.message);
         dataStatus.textContent = 'Error: ' + err.message;
       }
     }
   });
 
+  // Filenames end up in a URL, so keep them to characters that survive one.
+  function safeFileName(name) {
+    const dot = name.lastIndexOf('.');
+    const stem = (dot > 0 ? name.slice(0, dot) : name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'file';
+    const ext = (dot > 0 ? name.slice(dot + 1) : '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    return ext ? stem + '.' + ext : stem;
+  }
+
+  async function uniqueName(dir, name) {
+    const dot = name.lastIndexOf('.');
+    const stem = dot > 0 ? name.slice(0, dot) : name;
+    const ext = dot > 0 ? name.slice(dot) : '';
+    let candidate = name;
+    for (let n = 2; ; n++) {
+      try {
+        await dir.getFileHandle(candidate); // resolves only if it already exists
+      } catch (err) {
+        if (err.name === 'NotFoundError') return candidate;
+        throw err;
+      }
+      candidate = stem + '-' + n + ext;
+    }
+  }
+
+  // Copies a picked file into images/news/ and returns the path to record.
+  // No file dialog here: showSaveFilePicker() needs transient user activation,
+  // which is already gone by the time an <input type="file"> change event
+  // fires, so the write goes through the folder handle granted up front.
   async function saveMediaFile(file) {
+    if (!rootDir) {
+      alert('Choose your site folder first.');
+      return null;
+    }
     try {
-      const handle = await window.showSaveFilePicker({ suggestedName: file.name });
+      const images = await rootDir.getDirectoryHandle('images', { create: true });
+      const newsDir = await images.getDirectoryHandle('news', { create: true });
+      const name = await uniqueName(newsDir, safeFileName(file.name));
+      const handle = await newsDir.getFileHandle(name, { create: true });
       const writable = await handle.createWritable();
       await writable.write(file);
       await writable.close();
-      return 'images/news/' + handle.name;
+      return 'images/news/' + name;
     } catch (err) {
-      if (err.name === 'AbortError') return null;
-      alert('Error saving file: ' + err.message);
+      alert('Error saving ' + file.name + ': ' + err.message);
       return null;
     }
   }
@@ -169,7 +222,7 @@
     const file = thumbnailFile.files[0];
     if (!file) return;
     const path = await saveMediaFile(file);
-    if (path) setThumbnail(path);
+    if (path) setThumbnail(path, URL.createObjectURL(file));
     thumbnailFile.value = '';
   });
 
