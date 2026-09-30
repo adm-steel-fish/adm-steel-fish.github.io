@@ -6,6 +6,14 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 34,
+    date: "2026-09-29",
+    tag: "test",
+    title: "test",
+    summary: "test",
+    content: "",
+  },
+  {
     id: 33,
     date: "2026-09-19",
     tag: "Annoucement",
