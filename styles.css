@@ -511,6 +511,11 @@ nav a.nav-active {
 
 /* ── News Editor page ── */
 
+/* display rules like .editor-form's flex would otherwise override [hidden] */
+[hidden] {
+  display: none !important;
+}
+
 .editor-section {
   max-width: 800px;
 }
