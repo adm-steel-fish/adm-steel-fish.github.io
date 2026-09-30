@@ -1,6 +1,4 @@
 (function () {
-  const unsupportedMsg = document.getElementById('unsupported-msg');
-
   const articleSelect = document.getElementById('article-select');
   const fieldTitle = document.getElementById('field-title');
   const fieldTag = document.getElementById('field-tag');
@@ -17,20 +15,21 @@
   const saveBtn = document.getElementById('save-btn');
   const saveStatus = document.getElementById('save-status');
 
-  let rootDir = null;   // the site folder, granted once up front
-  let fileHandle = null; // news-data.js inside it
-  let headerText = '';
+  const API = '/api/news/';
+  const PASSWORD_KEY = 'sfs-editor-password';
+  const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // Netlify Functions cap request bodies at 6 MB
+
+  let password = '';
   let articles = [];
   let currentArticle = null; // null = new article
   let currentDateIso = '';
   let currentThumbnail = '';
   let savedRange = null;
-
-  if (!window.showDirectoryPicker) {
-    unsupportedMsg.hidden = false;
-    document.getElementById('editor-form').hidden = true;
-    return;
-  }
+  // Uploads waiting to be committed with the next Save, as { path, sha }.
+  let pendingMedia = [];
+  // Uploaded files preview from memory (blob: URLs) until they're deployed;
+  // this maps each preview URL back to the path recorded in the article.
+  const previewPaths = new Map();
 
   function todayIso() {
     const d = new Date();
@@ -109,111 +108,117 @@
     }
   });
 
-  // ---- Loading / saving news-data.js ----
+  // ---- Signing in / loading articles ----
 
-  const loadDataBtn = document.getElementById('load-data-btn');
+  const loginForm = document.getElementById('login-form');
+  const loginPassword = document.getElementById('login-password');
+  const loginStatus = document.getElementById('login-status');
+  const signedIn = document.getElementById('signed-in');
   const dataStatus = document.getElementById('data-status');
   const editorForm = document.getElementById('editor-form');
 
-  loadDataBtn.addEventListener('click', async () => {
+  async function api(action, body) {
+    const res = await fetch(API + action, {
+      method: body ? 'POST' : 'GET',
+      headers: Object.assign({ 'X-Editor-Password': password },
+        body ? { 'Content-Type': 'application/json' } : {}),
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    let data = {};
+    try { data = await res.json(); } catch (err) { /* non-JSON error page */ }
+    if (!res.ok) {
+      const err = new Error(data.error || ('Request failed (' + res.status + ')'));
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  function rememberPassword(value) {
     try {
-      // One readwrite grant on the site folder covers both news-data.js and
-      // the images/news/ folder that uploads are written into, so no other
-      // step needs a file dialog of its own.
-      const dir = await window.showDirectoryPicker({ id: 'sfs-site', mode: 'readwrite' });
-      if ((await dir.queryPermission({ mode: 'readwrite' })) !== 'granted' &&
-          (await dir.requestPermission({ mode: 'readwrite' })) !== 'granted') {
-        dataStatus.textContent = 'Permission to write to that folder was denied.';
-        return;
-      }
+      if (value) sessionStorage.setItem(PASSWORD_KEY, value);
+      else sessionStorage.removeItem(PASSWORD_KEY);
+    } catch (err) { /* storage unavailable; just ask again next time */ }
+  }
 
-      try {
-        fileHandle = await dir.getFileHandle('news-data.js');
-      } catch (err) {
-        if (err.name !== 'NotFoundError') throw err;
-        alert('No news-data.js in "' + dir.name + '". Please choose the folder that contains it (the Steel Fish Studios folder itself, not images/ or docs/).');
-        dataStatus.textContent = 'No news-data.js in that folder.';
-        return;
-      }
-      rootDir = dir;
-
-      const file = await fileHandle.getFile();
-      const text = await file.text();
-
-      const marker = 'const NEWS_ARTICLES = [';
-      const idx = text.indexOf(marker);
-      if (idx === -1) {
-        alert('Could not find "const NEWS_ARTICLES = [" in news-data.js.');
-        rootDir = null;
-        fileHandle = null;
-        return;
-      }
-      headerText = text.slice(0, idx) + marker + '\n';
-
-      const getArticles = new Function(text + '\nreturn NEWS_ARTICLES;');
-      articles = getArticles();
-
+  async function signIn(value) {
+    password = value;
+    loginStatus.textContent = 'Signing in…';
+    try {
+      const { name } = await api('login', {});
+      loginStatus.textContent = 'Loading articles…';
+      articles = (await api('articles')).articles;
+      rememberPassword(value);
       populateArticleSelect();
       loadArticleIntoForm(null);
+      loginForm.hidden = true;
+      signedIn.hidden = false;
       editorForm.hidden = false;
-      dataStatus.textContent = 'Loaded ' + articles.length + ' article(s) from ' + dir.name + '/news-data.js.';
+      dataStatus.textContent = 'Signed in as ' + name + ' · ' + articles.length + ' article(s).';
+      loginStatus.textContent = '';
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        alert('Error opening the site folder: ' + err.message);
-        dataStatus.textContent = 'Error: ' + err.message;
-      }
+      password = '';
+      rememberPassword('');
+      loginStatus.textContent = err.message;
     }
+  }
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (loginPassword.value) signIn(loginPassword.value);
   });
 
-  // Filenames end up in a URL, so keep them to characters that survive one.
-  function safeFileName(name) {
-    const dot = name.lastIndexOf('.');
-    const stem = (dot > 0 ? name.slice(0, dot) : name)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'file';
-    const ext = (dot > 0 ? name.slice(dot + 1) : '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    return ext ? stem + '.' + ext : stem;
+  document.getElementById('sign-out-btn').addEventListener('click', () => {
+    password = '';
+    rememberPassword('');
+    loginPassword.value = '';
+    editorForm.hidden = true;
+    signedIn.hidden = true;
+    loginForm.hidden = false;
+  });
+
+  try {
+    const stored = sessionStorage.getItem(PASSWORD_KEY);
+    if (stored) signIn(stored);
+  } catch (err) { /* storage unavailable */ }
+
+  function readAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   }
 
-  async function uniqueName(dir, name) {
-    const dot = name.lastIndexOf('.');
-    const stem = dot > 0 ? name.slice(0, dot) : name;
-    const ext = dot > 0 ? name.slice(dot) : '';
-    let candidate = name;
-    for (let n = 2; ; n++) {
-      try {
-        await dir.getFileHandle(candidate); // resolves only if it already exists
-      } catch (err) {
-        if (err.name === 'NotFoundError') return candidate;
-        throw err;
-      }
-      candidate = stem + '-' + n + ext;
-    }
-  }
-
-  // Copies a picked file into images/news/ and returns the path to record.
-  // No file dialog here: showSaveFilePicker() needs transient user activation,
-  // which is already gone by the time an <input type="file"> change event
-  // fires, so the write goes through the folder handle granted up front.
-  async function saveMediaFile(file) {
-    if (!rootDir) {
-      alert('Choose your site folder first.');
+  // Uploads a picked file and returns a blob: URL to preview it with (mapped
+  // to its images/news/ path on Save), or null if it failed.
+  async function uploadMedia(file) {
+    if (file.size > MAX_UPLOAD_BYTES) {
+      alert(file.name + ' is larger than 4 MB. Please use a smaller file, or host it elsewhere (e.g. YouTube) and use the link button.');
       return null;
     }
+    saveStatus.textContent = 'Uploading ' + file.name + '…';
     try {
-      const images = await rootDir.getDirectoryHandle('images', { create: true });
-      const newsDir = await images.getDirectoryHandle('news', { create: true });
-      const name = await uniqueName(newsDir, safeFileName(file.name));
-      const handle = await newsDir.getFileHandle(name, { create: true });
-      const writable = await handle.createWritable();
-      await writable.write(file);
-      await writable.close();
-      return 'images/news/' + name;
+      const { path, sha } = await api('media', {
+        filename: file.name,
+        contentBase64: await readAsBase64(file),
+      });
+      pendingMedia.push({ path, sha });
+      const preview = URL.createObjectURL(file);
+      previewPaths.set(preview, path);
+      saveStatus.textContent = 'Uploaded ' + file.name + ' — it goes live when you save.';
+      return preview;
     } catch (err) {
-      alert('Error saving ' + file.name + ': ' + err.message);
+      saveStatus.textContent = '';
+      alert('Error uploading ' + file.name + ': ' + err.message);
       return null;
     }
+  }
+
+  function withRealPaths(html) {
+    previewPaths.forEach((path, preview) => { html = html.split(preview).join(path); });
+    return html;
   }
 
   // ---- Thumbnail controls ----
@@ -221,9 +226,9 @@
   thumbnailFile.addEventListener('change', async () => {
     const file = thumbnailFile.files[0];
     if (!file) return;
-    const path = await saveMediaFile(file);
-    if (path) setThumbnail(path, URL.createObjectURL(file));
     thumbnailFile.value = '';
+    const preview = await uploadMedia(file);
+    if (preview) setThumbnail(previewPaths.get(preview), preview);
   });
 
   thumbnailLinkBtn.addEventListener('click', () => {
@@ -315,9 +320,9 @@
     const input = document.getElementById('rte-image-file');
     const file = input.files[0];
     if (!file) return;
-    const path = await saveMediaFile(file);
-    if (path) insertHtml('<img src="' + escapeHtml(path) + '" alt="">');
     input.value = '';
+    const preview = await uploadMedia(file);
+    if (preview) insertHtml('<img src="' + escapeHtml(preview) + '" alt="">');
   });
 
   function youtubeEmbedUrl(url) {
@@ -353,9 +358,9 @@
     const input = document.getElementById('rte-video-file');
     const file = input.files[0];
     if (!file) return;
-    const path = await saveMediaFile(file);
-    if (path) insertHtml('<video controls src="' + escapeHtml(path) + '"></video>');
     input.value = '';
+    const preview = await uploadMedia(file);
+    if (preview) insertHtml('<video controls src="' + escapeHtml(preview) + '"></video>');
   });
 
   function escapeHtml(str) {
@@ -366,66 +371,43 @@
 
   // ---- Save ----
 
-  function serializeArticle(article) {
-    const lines = [];
-    lines.push('  {');
-    lines.push('    id: ' + article.id + ',');
-    lines.push('    date: ' + JSON.stringify(article.date) + ',');
-    if (article.tag) lines.push('    tag: ' + JSON.stringify(article.tag) + ',');
-    if (article.thumbnail) lines.push('    thumbnail: ' + JSON.stringify(article.thumbnail) + ',');
-    lines.push('    title: ' + JSON.stringify(article.title) + ',');
-    lines.push('    summary: ' + JSON.stringify(article.summary) + ',');
-    lines.push('    content: ' + JSON.stringify(article.content || '') + ',');
-    lines.push('  },');
-    return lines.join('\n');
-  }
-
-  async function writeNewsData() {
-    const body = articles.map(serializeArticle).join('\n');
-    const fullText = headerText + body + '\n];\n';
-    const writable = await fileHandle.createWritable();
-    await writable.write(fullText);
-    await writable.close();
-  }
-
   saveBtn.addEventListener('click', async () => {
     const title = fieldTitle.value.trim();
-    const tag = fieldTag.value.trim();
     const summary = fieldSummary.value.trim();
-    const content = contentEditable.innerHTML.trim();
-
     if (!title || !summary) {
       saveStatus.textContent = 'Title and summary are required.';
       return;
     }
 
-    if (currentArticle) {
-      currentArticle.title = title;
-      currentArticle.tag = tag;
-      currentArticle.thumbnail = currentThumbnail;
-      currentArticle.summary = summary;
-      currentArticle.content = content;
-    } else {
-      const newId = articles.length ? Math.max(...articles.map(a => a.id)) + 1 : 1;
-      currentArticle = {
-        id: newId,
-        date: currentDateIso,
-        tag: tag,
-        thumbnail: currentThumbnail,
-        title: title,
-        summary: summary,
-        content: content,
-      };
-      articles.unshift(currentArticle);
-    }
-
+    saveBtn.disabled = true;
+    saveStatus.textContent = 'Saving…';
     try {
-      await writeNewsData();
+      const { article } = await api('save', {
+        article: {
+          id: currentArticle ? currentArticle.id : null,
+          date: currentDateIso,
+          title: title,
+          tag: fieldTag.value.trim(),
+          thumbnail: currentThumbnail,
+          summary: summary,
+          content: withRealPaths(contentEditable.innerHTML.trim()),
+        },
+        media: pendingMedia,
+      });
+      pendingMedia = [];
+
+      const i = articles.findIndex(a => a.id === article.id);
+      if (i === -1) articles.unshift(article);
+      else articles[i] = article;
+      currentArticle = article;
       populateArticleSelect();
-      articleSelect.value = String(currentArticle.id);
-      saveStatus.textContent = 'Saved!';
+      articleSelect.value = String(article.id);
+      saveStatus.textContent = 'Saved! The site updates in about a minute.';
     } catch (err) {
       saveStatus.textContent = 'Error saving: ' + err.message;
+      if (err.status === 401) alert('Your editor password is no longer valid. Please sign out and sign in again.');
+    } finally {
+      saveBtn.disabled = false;
     }
   });
 })();

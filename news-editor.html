@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>News Editor — Steel Fish Studios</title>
+  <meta name="robots" content="noindex">
   <link rel="icon" type="image/x-icon" href="images/favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -23,16 +24,18 @@
       <h1>News Editor</h1>
       <p class="news-lead">Create and edit articles for the News page.</p>
 
-      <div id="unsupported-msg" class="editor-unsupported" hidden>
-        <p>This editor needs a Chromium-based browser (Chrome or Edge) because it saves files directly to your computer.</p>
-      </div>
-
-      <div id="setup" class="editor-setup">
-        <div class="editor-setup-step">
-          <button type="button" id="load-data-btn" class="editor-btn">Choose your site folder to begin</button>
-          <span id="data-status" class="editor-status"></span>
+      <form id="login-form" class="editor-setup">
+        <div class="editor-setup-step editor-field">
+          <input type="password" id="login-password" placeholder="Editor password" autocomplete="current-password" required>
+          <button type="submit" class="editor-btn editor-btn-primary">Sign in</button>
+          <span id="login-status" class="editor-status"></span>
         </div>
-        <p class="editor-hint">Pick the folder that contains <code>news-data.js</code> (the <code>Steel Fish Studios</code> folder). Granting it once lets Save write straight back to <code>news-data.js</code>, and lets uploaded images and videos go into <code>images/news/</code> automatically.</p>
+        <p class="editor-hint">Ask the studio admin for an editor password.</p>
+      </form>
+
+      <div id="signed-in" class="editor-setup-step" hidden>
+        <span id="data-status" class="editor-status"></span>
+        <button type="button" id="sign-out-btn" class="editor-btn">Sign out</button>
       </div>
 
       <form id="editor-form" class="editor-form" hidden>
@@ -71,7 +74,7 @@
               <button type="button" id="thumbnail-remove-btn" class="editor-btn">Remove</button>
             </div>
           </div>
-          <p class="editor-hint">"Upload image" lets you pick any file from your computer. You'll then be asked where to save a copy — choose the <code>images/news</code> folder of this project so it shows up correctly on the site.</p>
+          <p class="editor-hint">"Upload image" lets you pick any image from your computer (up to 4 MB). It's added to the site when you save.</p>
         </div>
 
         <label class="editor-field">
@@ -104,7 +107,7 @@
             </div>
             <div id="content-editable" class="rte-content" contenteditable="true"></div>
           </div>
-          <p class="editor-hint">"Image" and "Video" let you pick a file from anywhere on your computer, then save a copy into this project's <code>images/news</code> folder so it displays correctly on the site.</p>
+          <p class="editor-hint">"Image" and "Video" upload a file from your computer (up to 4 MB each). For longer videos, upload to YouTube and use "Video link".</p>
           <p class="editor-hint">To remove an image or video from the content, click it to select it, then press Backspace or Delete.</p>
         </div>
 

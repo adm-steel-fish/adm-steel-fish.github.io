@@ -609,6 +609,7 @@ nav a.nav-active {
 }
 
 .editor-field input[type="text"],
+.editor-field input[type="password"],
 .editor-field select,
 .editor-field textarea {
   padding: 0.55rem 0.7rem;
