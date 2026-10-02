@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 35,
+    date: "2026-10-02",
+    tag: "Release",
+    thumbnail: "https://media.discordapp.net/attachments/1324188769318076491/1555439373548523540/image.png?backend=b2&ex=6ac0874d&is=6abf35cd&hm=1417c1ef5c07c2e4c13839f027187992c5b35f0d29065547270f2ff969e82deb&=&format=webp&quality=lossless&width=1536&height=857",
+    title: "She Tells Her Story - Play it in Dutch!",
+    summary: "Our upcoming visual novel game, She Tells Her Story, now has a Dutch translation.",
+    content: "<div>New demo for <i>She Tells Her Story</i> is now on Itch and Steam, featuring the Dutch translation! Change the game's language in the Options menu. Available for all versions.</div><div>If you would like us to translate the game to another language, please let us know in the comments!</div><div><br></div><div>Get the demo here:</div><div>* <a href=\"https://store.steampowered.com/app/4941080/She_Tells_Her_Story/\">Steam</a></div><div>* <a href=\"https://steelfishstudios.itch.io/she-tells-her-story\">Itch</a></div><div><br></div><div><img src=\"https://media.discordapp.net/attachments/1324188769318076491/1555439374760419429/image.png?backend=b2&amp;ex=6ac0874d&amp;is=6abf35cd&amp;hm=e884f032c6d48f1ac126f773f8f8c1b21a1bed9a60202108b4541b08843b6c0e&amp;=&amp;format=webp&amp;quality=lossless&amp;width=1536&amp;height=862\" alt=\"\"></div><div><img src=\"https://media.discordapp.net/attachments/1324188769318076491/1555439375502807101/image.png?backend=b2&amp;ex=6ac0874d&amp;is=6abf35cd&amp;hm=baece3fb180443ffaf9077a5de92d88319518f82bb4da93cd25def52897808cf&amp;=&amp;format=webp&amp;quality=lossless&amp;width=1536&amp;height=851\" alt=\"\"></div>",
+  },
+  {
     id: 34,
     date: "2026-09-29",
     tag: "Release",
