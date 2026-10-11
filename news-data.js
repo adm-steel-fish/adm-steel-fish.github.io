@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 36,
+    date: "2026-10-11",
+    tag: "Announcement",
+    thumbnail: "https://img.itch.zone/aW1nLzMwMjM2NzEwLnBuZw==/315x250%23c/4gpCju.png",
+    title: "Crispy the Cat - First sale!",
+    summary: "Crispy the Cat sold its first copy! Would you like to be its second buyer?",
+    content: "<span style=\"color: rgb(25, 32, 37); font-family: &quot;DM Sans&quot;, Nunito, sans-serif; font-size: 16px; font-variant-ligatures: no-common-ligatures; white-space: pre-line; background-color: rgb(255, 255, 255);\">We sold our first copy of Crispy the Cat last night!\nThat said, you can still <a href=\"steelfishstudios.itch.io/crispy-the-cat\">play it for free on your web browser</a>! Donations are optional but appreciated!</span><br>",
+  },
+  {
     id: 35,
     date: "2026-10-02",
     tag: "Release",
