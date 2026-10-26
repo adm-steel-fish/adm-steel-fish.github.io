@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>Ghost Attack Prototype</title>
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
+<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
+
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	width: 100%;
+	height: 100%;
+}
+
+body {
+	background: #050505;
+	color: #ffffff;
+	overflow: hidden;
+	touch-action: none;
+	font-family: monospace;
+}
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#start {
+	position: fixed;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	background: #050505;
+	z-index: 2;
+	text-align: center;
+}
+
+#start h1 {
+	margin: 0;
+	font-size: 1.25rem;
+	letter-spacing: 0.1em;
+}
+
+#start button {
+	border: 2px solid #ffffff;
+	background: #111111;
+	color: #ffffff;
+	font: inherit;
+	padding: 0.75rem 1.25rem;
+	cursor: pointer;
+}
+
+#notice {
+	min-height: 1.25rem;
+	color: #cfcfcf;
+}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<div id="start">
+			<h1>GHOST ATTACK</h1>
+			<button id="start-button" type="button">CLICK TO START</button>
+			<div id="notice">AUDIO STARTS AFTER INPUT</div>
+		</div>
+
+		<noscript>
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<script src="index.js"></script>
+		<script>
+const engine = new Engine({"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":14220532,"index.wasm":38034280},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4});
+const start = document.getElementById("start");
+const startButton = document.getElementById("start-button");
+const notice = document.getElementById("notice");
+let started = false;
+
+function startGame() {
+	if (started) {
+		return;
+	}
+	started = true;
+	startButton.disabled = true;
+	notice.textContent = "LOADING";
+	engine.startGame().then(function () {
+		start.remove();
+	}).catch(function (error) {
+		started = false;
+		startButton.disabled = false;
+		notice.textContent = "LOAD FAILED";
+		console.error(error);
+	});
+}
+
+startButton.addEventListener("click", startGame);
+window.addEventListener("keydown", function (event) {
+	if (!started && (event.code === "KeyZ" || event.code === "KeyJ" || event.code === "Enter" || event.code === "Space")) {
+		event.preventDefault();
+		startGame();
+	}
+});
+		</script>
+	</body>
+</html>
+
