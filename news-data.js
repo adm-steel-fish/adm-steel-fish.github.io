@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 39,
+    date: "2026-10-25",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/an_webp/HW8AfcUHiAY/mqdefault_6s.webp?du=3000&sqp=CIDd-tYG&rs=AOn4CLBu3Kb9ToNAP36dVlub2E9M8_P3-w",
+    title: "Swimming Platformer: Zooids!",
+    summary: "Zooids are a wildcard enemy that has all types of movements, from moving back and forth, to following the player, to moving in a circle.",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/HW8AfcUHiAY\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 38,
     date: "2026-10-24",
     tag: "Release",
