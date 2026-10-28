@@ -35,8 +35,40 @@ body {
 	align-items: center;
 }
 
+/* The "Play more games!" link sits in its own bar above the game instead of
+   on top of it. The canvas is sized to the space below by fitCanvas(). */
+#top-bar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	padding: 0 12px;
+	background-color: #111;
+	z-index: 100;
+}
+
+#top-bar a {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.12);
+	padding: 4px 14px;
+	border-radius: 4px;
+	text-decoration: none;
+	font-family: sans-serif;
+	font-size: 14px;
+}
+
+#top-bar a:hover {
+	background: rgba(255, 255, 255, 0.22);
+}
+
 #canvas {
 	display: block;
+	position: absolute;
+	left: 0;
+	top: 36px;
 }
 
 #canvas:focus {
@@ -50,7 +82,7 @@ body {
 }
 
 #status, #status-splash {
-	top: 0;
+	top: 36px;
 	bottom: 0;
 }
 
@@ -112,7 +144,7 @@ body {
 <script src="coi-serviceworker.js"></script>
 	</head>
 	<body>
-		<a href="https://steelfishstudios.com/games" style="position:fixed;top:12px;left:12px;z-index:100;background:rgba(0,0,0,0.7);color:#fff;padding:6px 14px;border-radius:4px;text-decoration:none;font-family:sans-serif;font-size:14px;">Play more games!</a>
+		<div id="top-bar"><a href="https://steelfishstudios.com/games">Play more games!</a></div>
 		<canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas>
@@ -129,7 +161,29 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":59421280,"index.wasm":43699190},"focusCanvas":true,"gdextensionLibs":[]};
+// canvasResizePolicy 0 means Godot keeps whatever size the page gives the
+// canvas, so it can fill the window below the top bar (policy 2 would always
+// make it the full window, under the bar). Fullscreen hides the bar.
+function fitCanvas() {
+	const canvas = document.getElementById('canvas');
+	const bar = document.getElementById('top-bar');
+	const fullscreen = !!document.fullscreenElement;
+	bar.style.display = fullscreen ? 'none' : '';
+	const top = fullscreen ? 0 : bar.offsetHeight;
+	const width = window.innerWidth;
+	const height = Math.max(1, window.innerHeight - top);
+	const ratio = window.devicePixelRatio || 1;
+	canvas.style.top = `${top}px`;
+	canvas.style.width = `${width}px`;
+	canvas.style.height = `${height}px`;
+	canvas.width = Math.floor(width * ratio);
+	canvas.height = Math.floor(height * ratio);
+}
+window.addEventListener('resize', fitCanvas);
+document.addEventListener('fullscreenchange', fitCanvas);
+fitCanvas();
+
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":0,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":true,"fileSizes":{"index.pck":59421280,"index.wasm":43699190},"focusCanvas":true,"gdextensionLibs":[]};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
