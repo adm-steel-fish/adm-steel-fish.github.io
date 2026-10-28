@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 40,
+    date: "2026-10-27",
+    tag: "Announcement",
+    thumbnail: "https://media.discordapp.net/attachments/1079812220860514428/1564819573981708298/image.png?ex=6ae2a74b&is=6ae155cb&hm=91325c00ab3d42f54ee99a83ef5b7e40a75d8def9c361ab7132703430ec9571a&=&format=webp&quality=lossless",
+    title: "Helio is on sale + 2 new prototypes!",
+    summary: "Go to Itch.io to get our first game, Adventures of Helio, for 50% off; try out our two newest game prototypes there too!",
+    content: "<div>We have some new content for you all to enjoy this coming Halloween!</div><div>A SALE for <b>Adventures of Helio</b>, and two new and PUBLIC small horror game prototypes, all available on itch.io! Yes, we did just drop two prototypical horror games for you all to take a look at, all on itch.io!</div><div><ul><li><a href=\"https://steelfishstudios.itch.io/adventures-of-helio\">Adventures of Helio (50% off until November 4th!)</a>:&nbsp;In this old-school style 2D platformer, you play as the young dragon, Helio, as he must battle and trek his way home before the sinister thief, El Ladron, does and steal his treasure! Play through 60 levels, in six worlds, and overcome various challenges and foes, including many insane bosses and creatures, in order to reach Helio's home and protect his treasure!</li></ul></div><div><img src=\"https://img.itch.zone/aW1hZ2UvMTk3MzEyNC8xNzk1MTk2Ny5wbmc=/794x1000/i6P728.png\" alt=\"\"></div><div><ul><li><a href=\"https://steelfishstudios.itch.io/ufo-gas-station\">UFO Gas Station</a>:&nbsp;You are lost in a mysterious desert, with the only way out being to locate eight pages before going to the bus stop. However, as you find the pages... they arrive... you must find the pages and avoid being caught by... them... or they will get you...</li></ul><img src=\"https://img.itch.zone/aW1hZ2UvNTIxMzU4OS8zMTMyMTEzNC5wbmc=/794x1000/hzC8zF.png\" alt=\"\"></div><div>* <a href=\"https://steelfishstudios.itch.io/fire-fairy\">Fire Fairy Forest</a>: You missed the bus on the way back from a winter festival and you are stuck in a mysterious forest. To escape, you must find eight pages that will bring the bus to you, but be careful... you're not alone in this forest...</div><div><img src=\"https://img.itch.zone/aW1hZ2UvNTIyNTc1Ny8zMTM3NTQxOC5wbmc=/794x1000/YHABCY.png\" alt=\"\"></div>",
+  },
+  {
     id: 39,
     date: "2026-10-25",
     tag: "Dev Update",
