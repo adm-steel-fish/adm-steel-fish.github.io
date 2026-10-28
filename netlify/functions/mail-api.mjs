@@ -21,6 +21,7 @@
 //   POST /api/mail/send      { to, subject, body }  → { ok: true, sent_today, daily_limit }
 //   GET  /api/mail/inbox                            → { letters: [...] }  (oldest first)
 //   POST /api/mail/ack       { ids: [...] }         → { deleted }
+// CORS is open to any origin, so web builds hosted elsewhere can call these.
 //
 // The game should save fetched letters locally *before* acking them. Acking
 // deletes them from the server, so a tab closed in between just means the same
@@ -77,10 +78,22 @@ async function signIn() {
 
 // ---- Helpers ----
 
+// The game's web build may be served from another site (itch.io), so browsers
+// need these to let it call us. "*" is safe: players authenticate with headers,
+// not cookies. Cross-Origin-Resource-Policy covers pages that are
+// cross-origin isolated, which Godot web builds usually are.
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, X-Player-Id, X-Player-Secret",
+  "Access-Control-Max-Age": "86400",
+  "Cross-Origin-Resource-Policy": "cross-origin",
+};
+
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 }
 
@@ -266,6 +279,9 @@ async function ack(req, player) {
 }
 
 export default async (req) => {
+  // Browser preflight for the custom X-Player-* headers.
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS_HEADERS });
+
   if (!process.env.MAIL_SERVER_EMAIL || !process.env.MAIL_SERVER_PASSWORD) {
     return json({ error: "Mail isn't configured yet (missing MAIL_SERVER_EMAIL or MAIL_SERVER_PASSWORD)." }, 500);
   }
