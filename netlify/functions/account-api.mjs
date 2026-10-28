@@ -23,13 +23,16 @@
 //   DISCORD_CLIENT_ID      From the Discord Developer Portal → your app → OAuth2.
 //   DISCORD_CLIENT_SECRET  Same page. Mark it as a secret.
 //   MAIL_SERVER_EMAIL, MAIL_SERVER_PASSWORD  Shared with mail-api.mjs.
+//   DISCORD_BOT_TOKEN      For supporter tiers; see netlify/lib/supporter.mjs.
 // In the Developer Portal, add this redirect: https://steelfishstudios.com/api/account/discord/callback
 //
-// Endpoints for the game (JSON; the last five need the X-Session header):
+// Endpoints for the game (JSON; the last six need the X-Session header):
 //   POST /api/account/login       { return_to? }  → { login_id, poll_secret, code, url, expires_in }
 //   GET  /api/account/login/poll?login=…  (X-Login-Secret header)
 //                                                 → { status: "pending" } or { status: "done", session, account }
 //   GET  /api/account/me                          → { account, save: { revision, updated_unix, summary } | null }
+//   GET  /api/account/supporter[?refresh=1]       → { tier, name, in_server, checked_unix }
+// "account" includes "supporter" in that same shape.
 //   GET  /api/account/save                        → { save, revision, updated_unix, summary } (save is null if none)
 //   POST /api/account/save        { save, base_revision, summary? } → { revision, updated_unix }
 //                                                   409 { revision, … } if another device saved since base_revision
@@ -46,6 +49,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
   deleteDoc, doc, getDoc, getFirestore, runTransaction, setDoc, updateDoc,
 } from "firebase/firestore";
+import { supporterStatus } from "../lib/supporter.mjs";
 
 // Same public web config as news-article.js.
 const firebaseConfig = {
@@ -163,7 +167,7 @@ function avatarUrl(user) {
     : `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(user.id) >> 22n) % 6}.png`;
 }
 
-function publicAccount(id, data) {
+async function publicAccount(id, ref, data) {
   return {
     account_id: id,
     provider: "discord",
@@ -171,6 +175,7 @@ function publicAccount(id, data) {
     username: data.username,
     display_name: data.globalName || data.username,
     avatar_url: data.avatarUrl,
+    supporter: await supporterStatus(ref, data),
   };
 }
 
@@ -252,7 +257,7 @@ async function pollLogin(req) {
   return json({
     status: "done",
     session: login.data.session,
-    account: publicAccount(account.id, account.data()),
+    account: await publicAccount(account.id, account.ref, account.data()),
   });
 }
 
@@ -384,7 +389,14 @@ function saveMeta(snap) {
 
 async function me(account) {
   const save = await getDoc(doc(db, SAVES, account.id));
-  return json({ account: publicAccount(account.id, account.data), save: saveMeta(save) });
+  return json({ account: await publicAccount(account.id, account.ref, account.data), save: saveMeta(save) });
+}
+
+// With ?refresh=1, asks Discord again (at most once a minute), e.g. right
+// after the player backs us.
+async function supporter(req, account) {
+  const force = new URL(req.url).searchParams.get("refresh") === "1";
+  return json(await supporterStatus(account.ref, account.data, { force }));
 }
 
 async function getSave(account) {
@@ -487,6 +499,7 @@ export default async (req) => {
     }
     const routes = {
       "GET me": (account) => me(account),
+      "GET supporter": (account) => supporter(req, account),
       "GET save": (account) => getSave(account),
       "POST save": (account) => putSave(req, account),
       "POST mail": (account) => linkMail(req, account),

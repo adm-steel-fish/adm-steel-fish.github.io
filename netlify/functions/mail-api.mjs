@@ -14,6 +14,7 @@
 //   MAIL_SERVER_PASSWORD  Its password. Mark it as a secret.
 // Optional:
 //   MAIL_DAILY_LIMIT      Letters each player may send per UTC day (default 10).
+//                         Supporters get more; see TIERS in netlify/lib/supporter.mjs.
 //   MAIL_REGISTER_LIMIT   New players per IP address per UTC day (default 10).
 //   MAIL_REPORT_LIMIT     Players who must report someone before that player's
 //                         sending is switched off (default 3).
@@ -22,6 +23,7 @@
 // X-Player-Secret headers):
 //   POST /api/mail/register  { display_name? }      → { player_id, secret, friend_code, display_name }
 //   POST /api/mail/send      { to, subject, body }  → { ok: true, sent_today, daily_limit }
+//   (inbox letters also carry from_tier, the sender's supporter tier when sent: 0-4)
 //   GET  /api/mail/inbox                            → { letters: [...] }  (oldest first)
 //   POST /api/mail/ack       { ids: [...] }         → { deleted }
 //   POST /api/mail/block     { code }               → { ok: true }
@@ -52,6 +54,7 @@ import {
   increment, query, runTransaction, serverTimestamp, where, writeBatch,
 } from "firebase/firestore";
 import { findBlockedWord } from "../lib/mail-word-filter.mjs";
+import { tierForAccountId, tierInfo } from "../lib/supporter.mjs";
 
 // Same public web config as news-article.js.
 const firebaseConfig = {
@@ -293,6 +296,11 @@ async function send(req, player) {
   if (!recipientId) return json({ error: "No one has that friend code." }, 404);
   const recipientRef = doc(db, PLAYERS, recipientId);
 
+  // Supporters (via the Discord account their mail is linked to) get a bigger
+  // daily limit and a badge on their letters.
+  const tier = await tierForAccountId(db, doc, player.data.accountId).catch(() => 0);
+  const dailyLimit = DAILY_LIMIT + tierInfo(tier).extraLetters;
+
   // Counting and sending in one transaction, so parallel requests can't slip
   // past the daily limit.
   const sentToday = await runTransaction(db, async (tx) => {
@@ -303,8 +311,8 @@ async function send(req, player) {
     }
     const today = utcDay();
     const count = me.get("sentDay") === today ? me.get("sentToday") || 0 : 0;
-    if (count >= DAILY_LIMIT) {
-      throw httpError(`You can only send ${DAILY_LIMIT} letters a day. Try again tomorrow.`, 429);
+    if (count >= dailyLimit) {
+      throw httpError(`You can only send ${dailyLimit} letters a day. Try again tomorrow.`, 429);
     }
     tx.update(player.ref, { sentDay: today, sentToday: count + 1 });
     // Blocked: looks sent to the sender, but is never delivered.
@@ -314,6 +322,7 @@ async function send(req, player) {
       from: player.id,
       fromName: me.get("displayName") || me.get("friendCode"),
       fromCode: me.get("friendCode"),
+      fromTier: tier,
       subject,
       body: text,
       sentAt: serverTimestamp(),
@@ -321,7 +330,7 @@ async function send(req, player) {
     return count + 1;
   });
 
-  return json({ ok: true, sent_today: sentToday, daily_limit: DAILY_LIMIT });
+  return json({ ok: true, sent_today: sentToday, daily_limit: dailyLimit });
 }
 
 async function inbox(player) {
@@ -339,6 +348,7 @@ async function inbox(player) {
         sent_unix: data.sentAt ? data.sentAt.toMillis() / 1000 : Date.now() / 1000,
       };
       letter.sig = signLetter(letter, player.id);
+      letter.from_tier = data.fromTier || 0; // not signed: reports don't quote it
       return letter;
     })
     .sort((a, b) => a.sent_unix - b.sent_unix)
