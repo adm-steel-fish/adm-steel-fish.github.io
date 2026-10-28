@@ -11,5 +11,14 @@ service cloud.firestore {
                     && request.resource.data.datetime is string;
       allow update, delete: if false;
     }
+
+    // Player mail is only touched by netlify/functions/mail-api.mjs, which
+    // signs in as the mail server's Firebase Auth user. Nobody else, players
+    // included, gets any access; the function checks players itself.
+    match /{collection}/{docId} {
+      allow read, write: if collection in ['mail_players', 'mail_friend_codes', 'mail_letters']
+                         && request.auth != null
+                         && request.auth.uid == 'Q6xv78gLDQgECahgg6BZtrCVl202';
+    }
   }
 }
