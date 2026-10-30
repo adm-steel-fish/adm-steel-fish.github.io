@@ -1,6 +1,12 @@
 [build]
   publish = "."
 
+# Firebase's type definitions in node_modules contain example "AIza..." API
+# key strings that trip Netlify's smart secret detection. They aren't real
+# secrets, so skip scanning installed dependencies.
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "node_modules/**"
+
 [[headers]]
   for = "/games/**/Build/*.js.br"
   [headers.values]
