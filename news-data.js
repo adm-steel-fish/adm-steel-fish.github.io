@@ -12,7 +12,7 @@ const NEWS_ARTICLES = [
     thumbnail: "https://img.itch.zone/aW1hZ2UvNTI1MzQzOC8zMTUzNDEwMC5wbmc=/794x1000/n86dL2.png",
     title: "Play 'Corn Field Crawler'",
     summary: "We released our third horror game in a short period, just in time for Halloween!",
-    content: "<b>HAPPY HALLOWEEN!</b><div>Mark made his 3rd horror game, <i>Corn Field Crawler</i>! Play it on&nbsp;<a href=\"https://steelfishstudios.itch.io/corn-field-crawler\" target=\"_blank\">Itch.io</a>!</div><div><br></div><div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/jOLDd8ha8wA\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></div>",
+    content: "<b>HAPPY HALLOWEEN!</b><div>Mark made his 3rd horror game, <i>Corn Field Crawler</i>! Play it on&nbsp;<a href=\"https://steelfishstudios.itch.io/corn-field-crawler\" target=\"_blank\">Itch.io</a>&nbsp;or on <a href=\"https://steelfishstudios.com/news-article.html?id=41\">our website!</a></div><div><br></div><div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/jOLDd8ha8wA\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></div>",
   },
   {
     id: 40,
