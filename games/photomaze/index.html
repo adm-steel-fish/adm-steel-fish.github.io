@@ -72,7 +72,7 @@ img {
   margin-right: auto;
 }
 
-.scene img, .scene .pricky-hop {
+.scene img {
   position: absolute;
   top: 0;
   left: 0;
@@ -83,41 +83,15 @@ img {
 }
 
 
-/* Shovel leaning in the corner of the dead end */
-.shovel-ground {
-  transform: translate(80px, 0px) scale(0.6);
-}
 
-/* Pricky sitting on the shovel blade */
-.on-shovel {
-  transform: translate(0px, 10px) scale(0.4);
-}
 
 /* Pricky next to Charles' feet in the adoption cutscene */
 .beside-charles {
   transform: translate(78px, 42px) scale(0.7);
 }
 
-/* Pet Pricky wandering around */
-.pricky-hop {
-  background-image: url("images/pricky.png");
-  background-size: 256px 240px;
-  animation: pricky-hop 3.6s infinite;
-}
 
-@keyframes pricky-hop {
-  0%   { background-image: url("images/pricky.png"); }
-  25%  { background-image: url("images/pricky2_3.png"); }
-  33%  { background-image: url("images/pricky2_4.png"); }
-  41%  { background-image: url("images/pricky2_5.png"); }
-  49%  { background-image: url("images/pricky2_6.png"); }
-  57%  { background-image: url("images/pricky2_7.png"); }
-  65%  { background-image: url("images/pricky2_8.png"); }
-  73%  { background-image: url("images/pricky2_9.png"); }
-  81%  { background-image: url("images/pricky2_10.png"); }
-  89%  { background-image: url("images/pricky2_11.png"); }
-  97%  { background-image: url("images/pricky.png"); }
-}</style><script role="script" id="twine-user-script" type="text/twine-javascript"></script><tw-passagedata pid="1" name="Main Menu" tags="" position="100,1225" size="100,100">&lt;h1&gt;Photomaze&lt;/h1&gt;
+</style><script role="script" id="twine-user-script" type="text/twine-javascript"></script><tw-passagedata pid="1" name="Main Menu" tags="" position="100,1225" size="100,100">&lt;h1&gt;Photomaze&lt;/h1&gt;
 &lt;img src=&quot;images/full_size_portrait.jpg&quot;&gt;
 &lt;h2&gt;Starring Charles Sullivan&lt;/h2&gt;
 [[New Game-&gt;Maze 1 Intro]] 
@@ -331,10 +305,9 @@ Something prickly lurks in this maze... watch your step!
 
 (link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3A3&quot;)]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="21" name="L3B3 Scoop" tags="" position="300,2800" size="100,100">{&lt;div class=&quot;scene&quot;&gt;
-&lt;img src=&quot;images/shovel.png&quot;&gt;
-&lt;img src=&quot;images/pricky.png&quot; class=&quot;on-shovel&quot;&gt;
-&lt;/div&gt;}
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="21" name="L3B3 Scoop" tags="" position="300,2800" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/shovel_pricky-down.png&quot;&gt;
+&lt;/div&gt;
 Charles carefully scoops the Pricky up with his shovel. It wriggles a bit, but it can&#39;t poke him from there!
 
 [[Continue-&gt;L3B3]]
@@ -387,13 +360,13 @@ He walked right into the Pricky and got a face full of spines. Back to the start
 
 (display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="27" name="L3D1" tags="" position="600,2400" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
-&lt;img src=&quot;images/dead-end.png&quot;&gt;
-(display: &quot;Charles Sprite&quot;)
-(if: $hasShovel is false)[&lt;img src=&quot;images/shovel.png&quot; class=&quot;shovel-ground&quot;&gt;]
+(if: $hasShovel is false)[&lt;img src=&quot;images/dead-end_shovel.png&quot;&gt;]
+(else:)[&lt;img src=&quot;images/dead-end.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)]
 &lt;/div&gt;}
 &lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
 
-(if: $hasShovel is false)[There is a shovel leaning against the wall.
+(if: $hasShovel is false)[There is a shovel stuck in the ground.
 
 (link: &quot;Pick up the shovel&quot;)[(set: $hasShovel to true)(go-to: &quot;L3D1 Shovel&quot;)]
 
@@ -491,10 +464,9 @@ What should Charles name his new pet?
 (input-box: bind $petName, &quot;=X=&quot;, 1, &quot;Prickles&quot;)
 
 (link: &quot;Confirm name&quot;)[(set: $petName to (trimmed: $petName))(if: $petName is &quot;&quot;)[(set: $petName to &quot;Prickles&quot;)](set: $prickyAdopted to true)(go-to: &quot;Maze Select&quot;)]]]</tw-passagedata><tw-passagedata pid="35" name="Pricky Pet" tags="" position="900,1225" size="100,100">&lt;h2&gt;$petName&lt;/h2&gt;
-{&lt;div class=&quot;scene&quot;&gt;
-&lt;img src=&quot;images/hallway_hori_more_wall.png&quot;&gt;
-&lt;div class=&quot;pricky-hop&quot;&gt;&lt;/div&gt;
-&lt;/div&gt;}
+&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/pricky.png&quot;&gt;
+&lt;/div&gt;
 |petText&gt;[$petName is happy to see you!]
 
 (link-repeat: &quot;Pet &quot; + $petName)[(replace: ?petText)[(either: &quot;Charles carefully pets &quot; + $petName + &quot; between the spines. It wiggles happily!&quot;, &quot;Ouch! &quot; + $petName + &quot; is a little too prickly to pet today.&quot;, $petName + &quot; leans into Charles&#39; hand and purrs... do Prickies purr?&quot;)]]
