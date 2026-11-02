@@ -82,10 +82,6 @@ img {
   max-height: none;
 }
 
-/* Pricky waiting just ahead, peeking out from behind Charles */
-.pricky-ahead {
-  transform: translate(78px, -22px) scale(0.6);
-}
 
 /* Shovel leaning in the corner of the dead end */
 .shovel-ground {
@@ -321,9 +317,9 @@ Something prickly lurks in this maze... watch your step!
 
 (display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="20" name="L3B3" tags="" position="400,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
-&lt;img src=&quot;images/3way.png&quot;&gt;
-(if: $wildPricky is true)[&lt;img src=&quot;images/pricky.png&quot; class=&quot;pricky-ahead&quot;&gt;]
-(display: &quot;Charles Sprite&quot;)
+(if: $wildPricky is true)[&lt;img src=&quot;images/3way_pricky.png&quot;&gt;]
+(else:)[&lt;img src=&quot;images/3way.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)]
 &lt;/div&gt;}
 (if: $wildPricky is true)[&lt;span style=&quot;color: red;&quot;&gt;A Pricky is ahead!&lt;/span&gt;
 (if: $hasShovel is true)[
