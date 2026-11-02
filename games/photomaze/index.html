@@ -464,8 +464,8 @@ What should Charles name his new pet?
 (input-box: bind $petName, &quot;=X=&quot;, 1, &quot;Prickles&quot;)
 
 (link: &quot;Confirm name&quot;)[(set: $petName to (trimmed: $petName))(if: $petName is &quot;&quot;)[(set: $petName to &quot;Prickles&quot;)](set: $prickyAdopted to true)(go-to: &quot;Maze Select&quot;)]]]</tw-passagedata><tw-passagedata pid="35" name="Pricky Pet" tags="" position="900,1225" size="100,100">&lt;h2&gt;$petName&lt;/h2&gt;
-&lt;div class=&quot;image-container&quot;&gt;
-	&lt;img src=&quot;images/pricky.png&quot;&gt;
+&lt;div style=&quot;text-align: center;&quot;&gt;
+	&lt;img src=&quot;images/pricky_crop.png&quot;&gt;
 &lt;/div&gt;
 |petText&gt;[$petName is happy to see you!]
 
