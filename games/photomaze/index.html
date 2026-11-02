@@ -120,14 +120,14 @@ img {
 }</style><script role="script" id="twine-user-script" type="text/twine-javascript"></script><tw-passagedata pid="1" name="Main Menu" tags="" position="100,1225" size="100,100">&lt;h1&gt;Photomaze&lt;/h1&gt;
 &lt;img src=&quot;images/full_size_portrait.jpg&quot;&gt;
 &lt;h2&gt;Starring Charles Sullivan&lt;/h2&gt;
-[[New Game-&gt;Level 1 Intro]] 
+[[New Game-&gt;Maze 1 Intro]] 
 
 (link: &quot;Load Game&quot;)[(load-game: &quot;Game File&quot;)] 
 
 [[Story]]
 
-(link: &quot;Play more games!&quot;)[(goto-url: &quot;https://steelfishstudios.com/games&quot;)]</tw-passagedata><tw-passagedata pid="2" name="Level 1 Intro" tags="" position="175,1525" size="100,100">&lt;h1&gt;Level 1&lt;/h1&gt;
-&lt;img src=&quot;images/level_1.png&quot;&gt;
+(link: &quot;Play more games!&quot;)[(goto-url: &quot;https://steelfishstudios.com/games&quot;)]</tw-passagedata><tw-passagedata pid="2" name="Maze 1 Intro" tags="" position="175,1525" size="100,100">&lt;h1&gt;Maze 1&lt;/h1&gt;
+&lt;img src=&quot;images/maze_1.png&quot;&gt;
 It will be a long way out of here...
 
 (link: &quot;Start Maze&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L1B4&quot;)]</tw-passagedata><tw-passagedata pid="3" name="Story" tags="" position="100,800" size="100,100">&lt;h1&gt;
@@ -295,25 +295,25 @@ You took $numOfMoves moves to complete this maze.
 (if: $prickyAdopted is true)[(link: &quot;Visit &quot; + $petName)[(go-to: &quot;Pricky Pet&quot;)]]
 &lt;/br&gt;
 &lt;h3&gt;Mazes&lt;/h3&gt;
-[[1: Learn to Maze -&gt;Level 1 Intro]] - High Score: $HighScore_1
-[[2: Second Verse, a lot like the first -&gt; Level 2 Intro]] - High Score: $HighScore_2
-[[3: Prickly Situation-&gt;Level 3 Intro]] - High Score: $HighScore_3</tw-passagedata><tw-passagedata pid="16" name="Charles Sprite" tags="" position="50,1550" size="100,100">{
+[[1: Learn to Maze -&gt;Maze 1 Intro]] - High Score: $HighScore_1
+[[2: Second Verse, a lot like the first -&gt;Maze 2 Intro]] - High Score: $HighScore_2
+[[3: Prickly Situation-&gt;Maze 3 Intro]] - High Score: $HighScore_3</tw-passagedata><tw-passagedata pid="16" name="Charles Sprite" tags="" position="50,1550" size="100,100">{
 (if: $currentDirection is &quot;up&quot;)[&lt;img src=&quot;images/up_full.png&quot;&gt;]
 (else-if: $currentDirection is &quot;down&quot;)[&lt;img src=&quot;images/down_full.png&quot;&gt;]
 (else-if: $currentDirection is &quot;left&quot;)[&lt;img src=&quot;images/left_full.png&quot;&gt;]
 (else-if: $currentDirection is &quot;right&quot;)[&lt;img src=&quot;images/right_full.png&quot;&gt;]
-}</tw-passagedata><tw-passagedata pid="17" name="L3 Inventory" tags="" position="50,2375" size="100,100">(if: $hasShovel is true)[&lt;h3&gt;Inventory&lt;/h3&gt;(if: $prickyOnShovel is true)[Shovel - Pricky](else:)[Shovel]]</tw-passagedata><tw-passagedata pid="18" name="Level 3 Intro" tags="" position="175,2525" size="100,100">&lt;h1&gt;Level 3&lt;/h1&gt;
-&lt;img src=&quot;images/level_3.png&quot;&gt;
+}</tw-passagedata><tw-passagedata pid="17" name="L3 Inventory" tags="" position="50,2375" size="100,100">(if: $hasShovel is true)[&lt;h3&gt;Inventory&lt;/h3&gt;(if: $prickyOnShovel is true)[Shovel - Pricky](else:)[Shovel]]</tw-passagedata><tw-passagedata pid="18" name="Maze 3 Intro" tags="" position="175,2525" size="100,100">&lt;h1&gt;Maze 3&lt;/h1&gt;
+&lt;img src=&quot;images/maze_3.png&quot;&gt;
 Something prickly lurks in this maze... watch your step!
 
-(link: &quot;Start Maze&quot;)[(set: $currentDirection to &quot;up&quot;)(set: $numOfMoves to 0)(set: $hasShovel to false)(set: $prickyOnShovel to false)(set: $wildPricky to true)(go-to: &quot;L3B4&quot;)]</tw-passagedata><tw-passagedata pid="19" name="L3B4" tags="" position="400,2700" size="100,100">(set: $numOfMoves to 0)
+(link: &quot;Start Maze&quot;)[(set: $currentDirection to &quot;up&quot;)(set: $numOfMoves to 0)(set: $hasShovel to false)(set: $prickyOnShovel to false)(set: $wildPricky to true)(go-to: &quot;L3C4&quot;)]</tw-passagedata><tw-passagedata pid="19" name="L3C4" tags="" position="500,2700" size="100,100">(set: $numOfMoves to 0)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/start-room.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
 &lt;/div&gt;}
 &lt;span style=&quot;color: green;&quot;&gt;You are at the start of the maze.&lt;/span&gt;
 
-(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3B3&quot;)]
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3C3&quot;)]
 
 (display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="20" name="L3B3" tags="" position="400,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
@@ -329,8 +329,6 @@ Something prickly lurks in this maze... watch your step!
 
 (link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L3C3&quot;)]
 
-(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L3B4&quot;)]
-
 (link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3A3&quot;)]
 
 (display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="21" name="L3B3 Scoop" tags="" position="300,2800" size="100,100">{&lt;div class=&quot;scene&quot;&gt;
@@ -342,15 +340,14 @@ Charles carefully scoops the Pricky up with his shovel. It wriggles a bit, but i
 [[Continue-&gt;L3B3]]
 
 (display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="22" name="L3 Pricky Defeat" tags="" position="500,2800" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
-{&lt;div class=&quot;scene&quot;&gt;
-&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
-&lt;img src=&quot;images/pricky.png&quot;&gt;
-&lt;/div&gt;}
+&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/hallway_vert_pricky.png&quot;&gt;
+&lt;/div&gt;
 &lt;span style=&quot;color: red;&quot;&gt;CHARLES WAS DEFEATED!&lt;/span&gt;
 
 He walked right into the Pricky and got a face full of spines. Back to the start of the maze you go...
 
-(link: &quot;Return to start&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3B4&quot;)]</tw-passagedata><tw-passagedata pid="23" name="L3A3" tags="" position="300,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+(link: &quot;Return to start&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3C4&quot;)]</tw-passagedata><tw-passagedata pid="23" name="L3A3" tags="" position="300,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/corner_nw.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
@@ -368,27 +365,27 @@ He walked right into the Pricky and got a face full of spines. Back to the start
 
 (link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3A3&quot;)]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="25" name="L3C3" tags="" position="500,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="25" name="L3D3" tags="" position="600,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/2way_ul.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
 &lt;/div&gt;}
-(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3C2&quot;)]
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3D2&quot;)]
 
-(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3B3&quot;)]
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3C3&quot;)]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="26" name="L3C2" tags="" position="500,2500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="26" name="L3D2" tags="" position="600,2500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/2way_ur.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
 &lt;/div&gt;}
-(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3C1&quot;)]
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L3D1&quot;)]
 
-(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L3D2&quot;)]
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L3E2&quot;)]
 
-(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L3C3&quot;)]
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L3D3&quot;)]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="27" name="L3C1" tags="" position="500,2400" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="27" name="L3D1" tags="" position="600,2400" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/dead-end.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
@@ -398,18 +395,18 @@ He walked right into the Pricky and got a face full of spines. Back to the start
 
 (if: $hasShovel is false)[There is a shovel leaning against the wall.
 
-(link: &quot;Pick up the shovel&quot;)[(set: $hasShovel to true)(go-to: &quot;L3C1 Shovel&quot;)]
+(link: &quot;Pick up the shovel&quot;)[(set: $hasShovel to true)(go-to: &quot;L3D1 Shovel&quot;)]
 
-](link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L3C2&quot;)]
+](link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L3D2&quot;)]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="28" name="L3C1 Shovel" tags="" position="600,2325" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="28" name="L3D1 Shovel" tags="" position="800,2325" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
 	&lt;img src=&quot;images/shovel.png&quot;&gt;
 &lt;/div&gt;
 You picked up a shovel! Could come in handy in a prickly situation...
 
-[[Continue-&gt;L3C1]]
+[[Continue-&gt;L3D1]]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="29" name="L3D2" tags="" position="600,2500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="29" name="L3E2" tags="" position="700,2500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/corner_ne.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
@@ -418,17 +415,17 @@ You picked up a shovel! Could come in handy in a prickly situation...
 
 You see a sign.
 
-[[Read sign-&gt;L3D2 Sign]]
+[[Read sign-&gt;L3E2 Sign]]
 
-(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3C2&quot;)]
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3D2&quot;)]
 
-(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="30" name="L3D2 Sign" tags="" position="700,2500" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+(display: &quot;L3 Inventory&quot;)</tw-passagedata><tw-passagedata pid="30" name="L3E2 Sign" tags="" position="800,2500" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
 	&lt;img src=&quot;images/sign.png&quot;&gt;
 &lt;/div&gt;
 Beware the Pricky! Touch one and you&#39;ll be sent running back to the start.
 But keep one at a shovel&#39;s length, and it can&#39;t hurt you!
 
-[[Finish reading-&gt;L3D2]]</tw-passagedata><tw-passagedata pid="31" name="L3B2" tags="" position="400,2500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+[[Finish reading-&gt;L3E2]]</tw-passagedata><tw-passagedata pid="31" name="L3B2" tags="" position="400,2500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/hallway_vert.png&quot;&gt;
 (display: &quot;Charles Sprite&quot;)
@@ -514,8 +511,8 @@ What should Charles name his new pet?
 
 (link: &quot;Confirm name&quot;)[(set: _newName to (trimmed: _newName))(if: _newName is not &quot;&quot;)[(set: $petName to _newName)](go-to: &quot;Pricky Pet&quot;)]
 
-[[Cancel-&gt;Pricky Pet]]</tw-passagedata><tw-passagedata pid="37" name=" Level 2 Intro" tags="" position="200,1700" size="100,100">&lt;h1&gt;Level 2&lt;/h1&gt;
-&lt;img src=&quot;images/level_2.png&quot;&gt;
+[[Cancel-&gt;Pricky Pet]]</tw-passagedata><tw-passagedata pid="37" name="Maze 2 Intro" tags="" position="200,1700" size="100,100">&lt;h1&gt;Maze 2&lt;/h1&gt;
+&lt;img src=&quot;images/maze_2.png&quot;&gt;
 That wasn&#39;t so bad.
 This shouldn&#39;t be, either.
 
@@ -694,7 +691,18 @@ You see a sign.
 &lt;/div&gt;
 If you go back to the green spot where you started the maze, your Move Count will reset to 0. Keep this in mind if you&#39;re going for a record!
 
-[[Finish reading-&gt;L2D1]] </tw-passagedata></tw-storydata>
+[[Finish reading-&gt;L2D1]] </tw-passagedata><tw-passagedata pid="52" name="L3C3" tags="" position="500,2600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_hori_more_floor.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L3D3&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L3C4&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L3B3&quot;)]
+
+(display: &quot;L3 Inventory&quot;)</tw-passagedata></tw-storydata>
 <script title="Twine engine code" data-main="harlowe">(function(){"use strict";
 var require,define;!function(){var e={},r={};require=function(i){var n=e[i];return n&&(r[i]=n[1].apply(void 0,n[0].map(require)),e[i]=void 0),r[i]},(define=function(r,i,n){if("function"==typeof r)return r();e[r]=[i,n]}).amd=!0}();/*!
  * https://github.com/paulmillr/es6-shim
