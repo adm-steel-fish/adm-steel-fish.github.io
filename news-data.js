@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 42,
+    date: "2026-11-07",
+    tag: "Release",
+    thumbnail: "https://steelfishstudios.com/games/nextghoul/thumbnail.png",
+    title: "Play 'NextGhoul' on Itch.io or on our website!",
+    summary: "See how many floors you can escape from the NextGhoul!",
+    content: "<div>You are trapped in an endless nightmare... you have to find the exit in this bizarre, liminal space maze... see how many floors you can escape before... it... gets to you, in this retro-style liminal space horror game</div><div><br></div><div>If it sees you... RUN!!!!!!!!!!!!!!</div><div><br></div><div>Play on&nbsp;<a href=\"https://steelfishstudios.itch.io/nextghoul\" target=\"_blank\">Itch.io</a>&nbsp;or <a href=\"https://steelfishstudios.com/games/nextghoul/\">on our website</a>!</div><div><br></div><div><iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/ykdKCjKukd8\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe></div>",
+  },
+  {
     id: 41,
     date: "2026-10-29",
     tag: "Release",
