@@ -798,6 +798,7 @@ You took $numOfMoves moves to complete this maze.
 
 [[Main Menu]]</tw-passagedata><tw-passagedata pid="68" name="L5 Inventory" tags="" position="50,3800" size="100,100">(if: $hasKey is true)[&lt;h3&gt;Inventory&lt;/h3&gt;Key]</tw-passagedata><tw-passagedata pid="69" name="Maze 5 Intro" tags="" position="175,3950" size="100,100">&lt;h1&gt;Maze 5&lt;/h1&gt;
 &lt;img src=&quot;images/maze_5.png&quot;&gt;
+&quot;Looks like one o&#39; the paths has a glas on it. An&#39; not the good kind o&#39; ‘glass’ like the one that holds me ale, mind ye... no, I mean a lock.&quot;
 
 (link: &quot;Start Maze&quot;)[(set: $currentDirection to &quot;up&quot;)(set: $numOfMoves to 0)(set: $hasKey to false)(set: $doorUnlocked to false)(go-to: &quot;L5B4&quot;)]</tw-passagedata><tw-passagedata pid="70" name="L5B4" tags="" position="400,4150" size="100,100">(set: $numOfMoves to 0)
 {&lt;div class=&quot;scene&quot;&gt;
@@ -857,16 +858,14 @@ It works just as well inside a maze as it does in your world!
 
 [[Finish reading-&gt;L5A1]]</tw-passagedata><tw-passagedata pid="76" name="L5C2" tags="" position="500,3950" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
-(if: $doorUnlocked is true)[&lt;img src=&quot;images/3way.png&quot;&gt;](else:)[&lt;img src=&quot;images/3way_door.png&quot;&gt;]
-(display: &quot;Charles Sprite&quot;)
+(if: $doorUnlocked is true)[&lt;img src=&quot;images/3way.png&quot;&gt;(display: &quot;Charles Sprite&quot;)]
+(else:)[&lt;img src=&quot;images/3way_door.png&quot;&gt;&lt;img src=&quot;images/up_quarter.png&quot;&gt;]
 &lt;/div&gt;}
-(if: $doorUnlocked is true)[There is an Exit Portal ahead.
+{(if: $doorUnlocked is true)[There is an Exit Portal ahead.]
+(else:)[A locked door blocks the way ahead.(if: $hasKey is false)[ If only Charles had a key...]]}
 
-(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L5C1&quot;)]]
-(else-if: $hasKey is true)[A locked door blocks the way ahead.
-
-(link: &quot;Unlock the door with the key&quot;)[(set: $hasKey to false)(set: $doorUnlocked to true)(go-to: &quot;L5C2 Unlock&quot;)]]
-(else:)[A locked door blocks the way ahead. If only Charles had a key...]
+{(if: $doorUnlocked is true)[(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L5C1&quot;)]]
+(else-if: $hasKey is true)[(link: &quot;Unlock the door with the key&quot;)[(set: $hasKey to false)(set: $doorUnlocked to true)(go-to: &quot;L5C2 Unlock&quot;)]]}
 
 (link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L5D2&quot;)]
 
@@ -898,7 +897,8 @@ Charles turns the key in the lock... *CLICK!* The door swings open!
 (display: &quot;L5 Inventory&quot;)</tw-passagedata><tw-passagedata pid="80" name="L5E3" tags="" position="700,4050" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
 {&lt;div class=&quot;scene&quot;&gt;
 &lt;img src=&quot;images/corner_ne.png&quot;&gt;
-(display: &quot;Charles Sprite&quot;)
+(if: $hasKey is false and $doorUnlocked is false)[&lt;img src=&quot;images/key.png&quot;&gt;]
+(else:)[(display: &quot;Charles Sprite&quot;)]
 &lt;/div&gt;}
 &lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
 
