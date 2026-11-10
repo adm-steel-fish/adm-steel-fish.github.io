@@ -15,7 +15,7 @@ export const GUILD_ID = "1079569072418734150";
 
 // Highest tier wins. 0 means not a supporter.
 export const TIERS = [
-  { tier: 1, name: "Bronze Guppy", roleId: "1095948511775830056", extraLetters: 0 },
+  { tier: 1, name: "Bronze Guppy", roleId: "1095948511775830056", extraLetters: 1 },
   { tier: 2, name: "Silver Bass", roleId: "1095948584958042112", extraLetters: 5 },
   { tier: 3, name: "Golden Shark", roleId: "1095948606499999766", extraLetters: 15 },
   { tier: 4, name: "Platinum Ray", roleId: "1095948636875137075", extraLetters: 25 },

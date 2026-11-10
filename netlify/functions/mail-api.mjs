@@ -87,11 +87,14 @@ const MAX_BLOCKED = 500;
 
 // Letter designs, matching Global.MAIL_PATTERNS in the game. Anything else
 // (including letters from older game versions) is sent as "default". The game
-// keeps track of which designs a player has bought, so this only checks the
-// name is real.
+// keeps track of which designs a player has bought or claimed, so this only
+// checks the name is real. Supporter designs aren't checked against the
+// sender's current tier either: backers keep designs they claimed after they
+// stop backing.
 const MAIL_PATTERNS = new Set([
   "default", "inverse", "crispy", "crispy_inv", "blue", "green", "red",
   "mintyocean", "strawberry", "stargrazer",
+  "bronze_guppy", "silver_bass", "golden_shark", "platinum_ray",
 ]);
 const DEFAULT_PATTERN = "default";
 
