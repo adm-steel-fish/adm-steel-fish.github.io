@@ -22,8 +22,9 @@
 // Endpoints (all JSON; everything except register needs the X-Player-Id and
 // X-Player-Secret headers):
 //   POST /api/mail/register  { display_name? }      → { player_id, secret, friend_code, display_name }
-//   POST /api/mail/send      { to, subject, body }  → { ok: true, sent_today, daily_limit }
-//   (inbox letters also carry from_tier, the sender's supporter tier when sent: 0-4)
+//   POST /api/mail/send      { to, subject, body, pattern? }  → { ok: true, sent_today, daily_limit }
+//   (inbox letters also carry from_tier, the sender's supporter tier when sent: 0-4,
+//   and pattern, the letter design the sender chose; see MAIL_PATTERNS)
 //   GET  /api/mail/inbox                            → { letters: [...] }  (oldest first)
 //   POST /api/mail/ack       { ids: [...] }         → { deleted }
 //   POST /api/mail/block     { code }               → { ok: true }
@@ -83,6 +84,16 @@ const MAX_REASON = 200;
 const MAX_INBOX = 50; // matches Global.MAX_MAIL in the game
 const MAX_ACK = 100;
 const MAX_BLOCKED = 500;
+
+// Letter designs, matching Global.MAIL_PATTERNS in the game. Anything else
+// (including letters from older game versions) is sent as "default". The game
+// keeps track of which designs a player has bought, so this only checks the
+// name is real.
+const MAIL_PATTERNS = new Set([
+  "default", "inverse", "crispy", "crispy_inv", "blue", "green", "red",
+  "mintyocean", "strawberry", "stargrazer",
+]);
+const DEFAULT_PATTERN = "default";
 
 // No 0/O, 1/I/L: friend codes get read aloud and typed in by hand.
 const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -173,6 +184,10 @@ function cleanText(value, max) {
     .replace(/[\u0000-\u0008\u000B-\u001F\u007F]/g, "")
     .trim()
     .slice(0, max);
+}
+
+function cleanPattern(value) {
+  return typeof value === "string" && MAIL_PATTERNS.has(value) ? value : DEFAULT_PATTERN;
 }
 
 function cleanName(value) {
@@ -284,6 +299,7 @@ async function send(req, player) {
   const toCode = normalizeFriendCode(body.to);
   const subject = cleanText(body.subject, MAX_SUBJECT);
   const text = cleanText(body.body, MAX_BODY);
+  const pattern = cleanPattern(body.pattern);
   if (!toCode) return json({ error: "That isn't a valid friend code." }, 400);
   if (!text) return json({ error: "The letter is empty." }, 400);
   if (toCode === player.data.friendCode) return json({ error: "You can't mail yourself." }, 400);
@@ -325,6 +341,7 @@ async function send(req, player) {
       fromTier: tier,
       subject,
       body: text,
+      pattern,
       sentAt: serverTimestamp(),
     });
     return count + 1;
@@ -349,6 +366,7 @@ async function inbox(player) {
       };
       letter.sig = signLetter(letter, player.id);
       letter.from_tier = data.fromTier || 0; // not signed: reports don't quote it
+      letter.pattern = cleanPattern(data.pattern); // not signed either: it's only looks
       return letter;
     })
     .sort((a, b) => a.sent_unix - b.sent_unix)
