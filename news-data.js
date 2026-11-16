@@ -6,6 +6,15 @@
 
 const NEWS_ARTICLES = [
   {
+    id: 43,
+    date: "2026-11-15",
+    tag: "Dev Update",
+    thumbnail: "https://i.ytimg.com/vi/Z93zYwSK5Ww/oar1.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&rs=AOn4CLAfSwFBi1oiNQGgnw7Iapuk9wrLhQ",
+    title: "Speedy Platformer: New Prototype",
+    summary: "Racing platformer. Try to get to the end of each level as fast as you can!",
+    content: "<iframe width=\"560\" height=\"315\" src=\"https://www.youtube.com/embed/Z93zYwSK5Ww\" title=\"Video Player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen=\"\" loading=\"lazy\"></iframe>",
+  },
+  {
     id: 42,
     date: "2026-11-07",
     tag: "Release",
