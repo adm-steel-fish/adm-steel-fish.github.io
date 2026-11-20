@@ -253,6 +253,7 @@ You took $numOfMoves moves to complete this maze.
 (set: $HighScore_4 to 999)
 (set: $HighScore_5 to 999)
 (set: $HighScore_6 to 999)
+(set: $HighScore_7 to 999)
 
 (set: $hasShovel to false)
 (set: $prickyOnShovel to false)
@@ -260,18 +261,21 @@ You took $numOfMoves moves to complete this maze.
 (set: $prickyAdopted to false)
 (set: $petName to &quot;Prickles&quot;)
 }</tw-passagedata><tw-passagedata pid="15" name="Maze Select" tags="" position="750,1225" size="100,100">&lt;h2&gt;Maze Select&lt;/h2&gt;
-&lt;h3&gt;Misc.&lt;/h3&gt;
-(link:&quot;Save Game&quot;)[(save-game: &quot;Game File&quot;)] &lt;!-- Save a game file --&gt;
+&lt;h3&gt;Misc.&lt;/h3&gt;(link:&quot;Save Game&quot;)[(save-game: &quot;Game File&quot;)] &lt;!-- Save a game file. Kept on the heading's line: in Harlowe every line break renders as a gap. --&gt;
 [[Main Menu]]
 (if: $prickyAdopted is true)[(link: &quot;Visit &quot; + $petName)[(go-to: &quot;Pricky Pet&quot;)]]
 &lt;/br&gt;
-&lt;h3&gt;Mazes&lt;/h3&gt;
-[[1: Learn to Maze -&gt;Maze 1 Intro]] - High Score: $HighScore_1
+{&lt;h3&gt;Mazes&lt;/h3&gt;
+&lt;!-- Saves made before Maze 7 existed have no $HighScore_7 (unset = 0). --&gt;
+(if: $HighScore_7 is 0)[(set: $HighScore_7 to 999)]
+&lt;!-- Episodes: click the heading to expand/collapse. $epNCollapsed is unset (0) by default, so episodes start expanded. --&gt;
+}&lt;h4&gt;(if: $ep1Collapsed is true)[(link: &quot;▶ Episode 1 - The Morning Jog&quot;)[(set: $ep1Collapsed to false)(go-to: &quot;Maze Select&quot;)]](else:)[(link: &quot;▼ Episode 1 - The Morning Jog&quot;)[(set: $ep1Collapsed to true)(go-to: &quot;Maze Select&quot;)]]&lt;/h4&gt;(unless: $ep1Collapsed is true)[[[1: Learn to Maze -&gt;Maze 1 Intro]] - High Score: $HighScore_1
 [[2: Second Verse, a lot like the first -&gt;Maze 2 Intro]] - High Score: $HighScore_2
-[[3: Prickly Situation-&gt;Maze 3 Intro]] - High Score: $HighScore_3
-&lt;!-- Mazes 4+ unlock after beating Maze 3 (it sets $HighScore_3 below 999). Put new mazes inside this hook. --&gt;
+[[3: Prickly Situation-&gt;Maze 3 Intro]] - High Score: $HighScore_3&lt;!-- Mazes 4+ unlock after beating Maze 3 (it sets $HighScore_3 below 999). Put new mazes inside this hook. --&gt;
 (if: $HighScore_3 &lt; 999)[(link-goto: &quot;4: Horseshoe-ish&quot;, &quot;Maze 4 Intro&quot;) - High Score: $HighScore_4
-(link-goto: &quot;5: Lock In&quot;, &quot;Maze 5 Intro&quot;) - High Score: $HighScore_5](else:)[&lt;span style=&quot;color: gray;&quot;&gt;Beat Maze 3 to unlock more mazes!&lt;/span&gt;]</tw-passagedata><tw-passagedata pid="16" name="Charles Sprite" tags="" position="50,1550" size="100,100">{
+(link-goto: &quot;5: Lock In&quot;, &quot;Maze 5 Intro&quot;) - High Score: $HighScore_5
+(link-goto: &quot;6: Double Trouble&quot;, &quot;Maze 6 Intro&quot;) - High Score: $HighScore_6
+&lt;!-- Maze 7 unlocks only after Mazes 5 and 6 are both beaten. --&gt;(if: $HighScore_5 &lt; 999 and $HighScore_6 &lt; 999)[(link-goto: &quot;7: Behind Closed Doors&quot;, &quot;Maze 7 Intro&quot;) - High Score: $HighScore_7](else:)[&lt;span style=&quot;color: gray;&quot;&gt;Beat Mazes 5 and 6 to unlock Maze 7!&lt;/span&gt;]](else:)[&lt;span style=&quot;color: gray;&quot;&gt;Beat Maze 3 to unlock more mazes!&lt;/span&gt;]]&lt;div style=&quot;height: 4em;&quot;&gt;&lt;/div&gt;&lt;!-- Bottom padding so the last maze is not flush with the page edge. --&gt;</tw-passagedata><tw-passagedata pid="16" name="Charles Sprite" tags="" position="50,1550" size="100,100">{
 (if: $currentDirection is &quot;up&quot;)[&lt;img src=&quot;images/up_full.png&quot;&gt;]
 (else-if: $currentDirection is &quot;down&quot;)[&lt;img src=&quot;images/down_full.png&quot;&gt;]
 (else-if: $currentDirection is &quot;left&quot;)[&lt;img src=&quot;images/left_full.png&quot;&gt;]
@@ -935,6 +939,447 @@ You took $numOfMoves moves to complete this maze.
 	(set: $HighScore_5 to $numOfMoves)
 ]
 (set: $hasKey to false)(set: $doorUnlocked to false)
+[[Maze Select]]
+
+[[Main Menu]]</tw-passagedata><tw-passagedata pid="83" name="L6-7 Inventory" tags="" position="50,4400" size="100,100">(if: $hasShovel is true or $hasKey is true)[&lt;h3&gt;Inventory&lt;/h3&gt;(if: $hasShovel is true)[(if: $prickyOnShovel is true)[Shovel - Pricky](else:)[Shovel]](if: $hasShovel is true and $hasKey is true)[&lt;br&gt;](if: $hasKey is true)[Key]]</tw-passagedata><tw-passagedata pid="84" name="Maze 6 Intro" tags="" position="175,4550" size="100,100">&lt;h1&gt;Maze 6&lt;/h1&gt;
+&lt;img src=&quot;images/maze_6.png&quot;&gt;
+&quot;A Thiarna! A Pricky AND a locked door!&quot;
+
+(link: &quot;Start Maze&quot;)[(set: $currentDirection to &quot;up&quot;)(set: $numOfMoves to 0)(set: $hasShovel to false)(set: $prickyOnShovel to false)(set: $wildPricky to true)(set: $hasKey to false)(set: $doorUnlocked to false)(go-to: &quot;L6C4&quot;)]</tw-passagedata><tw-passagedata pid="85" name="L6C4" tags="" position="500,4900" size="100,100">(set: $numOfMoves to 0)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/start-room.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+&lt;span style=&quot;color: green;&quot;&gt;You are at the start of the maze.&lt;/span&gt;
+
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L6C3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="86" name="L6C3" tags="" position="500,4800" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_hori_more_floor.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L6D3&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L6C4&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L6B3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="87" name="L6B3" tags="" position="400,4800" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/2way_ur.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L6B2&quot;)]
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L6C3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="88" name="L6B2" tags="" position="400,4700" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/2way_ul.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L6B1&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L6B3&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L6A2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="89" name="L6A2" tags="" position="300,4700" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_nw.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+&lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L6B2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="90" name="L6B1" tags="" position="400,4600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_nw.png&quot;&gt;
+(if: $hasShovel is false)[&lt;img src=&quot;images/shovel.png&quot;&gt;]
+(else:)[(display: &quot;Charles Sprite&quot;)]
+&lt;/div&gt;}
+
+(if: $hasShovel is false)[There is a shovel stuck in the ground.
+
+(link: &quot;Pick up the shovel&quot;)[(set: $hasShovel to true)(go-to: &quot;L6B1 Shovel&quot;)]
+
+](link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L6C1&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L6B2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="91" name="L6B1 Shovel" tags="" position="400,4500" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/shovel.png&quot;&gt;
+&lt;/div&gt;
+You picked up a shovel! Could come in handy in a prickly situation...
+
+[[Continue-&gt;L6B1]]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="92" name="L6C1" tags="" position="500,4600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_ne.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+&lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L6B1&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="93" name="L6D3" tags="" position="600,4800" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+(if: $wildPricky is true)[&lt;img src=&quot;images/3way_pricky.png&quot;&gt;]
+(else:)[&lt;img src=&quot;images/3way.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)]
+&lt;/div&gt;}
+(if: $wildPricky is true)[&lt;span style=&quot;color: red;&quot;&gt;A Pricky is ahead!&lt;/span&gt;
+(if: $hasShovel is true)[
+(link: &quot;Scoop up the Pricky with the shovel&quot;)[(set: $wildPricky to false)(set: $prickyOnShovel to true)(go-to: &quot;L6D3 Scoop&quot;)]]
+
+](link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(if: $wildPricky is true)[(go-to: &quot;L6 Pricky Defeat&quot;)](else:)[(go-to: &quot;L6D2&quot;)]]
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L6E3&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L6C3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="94" name="L6D3 Scoop" tags="" position="550,4950" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/shovel_pricky-down.png&quot;&gt;
+&lt;/div&gt;
+Charles carefully scoops the Pricky up with his shovel. It wriggles a bit, but it can&#39;t poke him from there!
+
+[[Continue-&gt;L6D3]]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="95" name="L6 Pricky Defeat" tags="" position="700,4950" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/hallway_vert_pricky.png&quot;&gt;
+&lt;/div&gt;
+&lt;span style=&quot;color: red;&quot;&gt;CHARLES WAS DEFEATED!&lt;/span&gt;
+
+He walked right into the Pricky and got a face full of spines. Back to the start of the maze you go...
+
+(link: &quot;Return to start&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L6C4&quot;)]</tw-passagedata><tw-passagedata pid="96" name="L6E3" tags="" position="700,4800" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_ne.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L6E4&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L6D3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="97" name="L6E4" tags="" position="700,4900" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
+(if: $hasKey is false and $doorUnlocked is false)[&lt;img src=&quot;images/key.png&quot;&gt;]
+(else:)[(display: &quot;Charles Sprite&quot;)]
+&lt;/div&gt;}
+&lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
+
+(if: $hasKey is false and $doorUnlocked is false)[Something shiny is lying on the ground... a key!
+
+(link: &quot;Pick up the key&quot;)[(set: $hasKey to true)(go-to: &quot;L6E4 Key&quot;)]
+
+](link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L6E3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="98" name="L6E4 Key" tags="" position="850,4900" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/key.png&quot;&gt;
+&lt;/div&gt;
+You picked up a key! Now, where&#39;s that door...
+
+[[Continue-&gt;L6E4]]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="99" name="L6D2" tags="" position="600,4700" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+(if: $doorUnlocked is true)[&lt;img src=&quot;images/hallway_vert.png&quot;&gt;(display: &quot;Charles Sprite&quot;)]
+(else:)[&lt;img src=&quot;images/hallway_vert_door.png&quot;&gt;&lt;img src=&quot;images/up_quarter.png&quot;&gt;]
+&lt;/div&gt;}
+{(if: $doorUnlocked is true)[The door is open.]
+(else:)[A locked door blocks the way ahead.(if: $hasKey is false)[ If only Charles had a key...]]}
+
+{(if: $doorUnlocked is true)[(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L6D1&quot;)]]
+(else-if: $hasKey is true)[(link: &quot;Unlock the door with the key&quot;)[(set: $hasKey to false)(set: $doorUnlocked to true)(go-to: &quot;L6D2 Unlock&quot;)]]}
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L6D3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="100" name="L6D2 Unlock" tags="" position="850,4700" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/door.png&quot;&gt;
+&lt;/div&gt;
+Charles turns the key in the lock... *CLICK!* The door swings open!
+
+[[Continue-&gt;L6D2]]</tw-passagedata><tw-passagedata pid="101" name="L6D1" tags="" position="600,4600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_nw.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+There is an Exit Portal to your right.
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L6E1&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L6D2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="102" name="L6E1" tags="" position="700,4600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+&lt;div class=&quot;image-container&quot;&gt;
+  &lt;img src=&quot;images/victory.gif&quot; class=&quot;background-image&quot;&gt;
+&lt;/div&gt;
+{
+(live: 1s)[
+(set: $randomRed to (random: 0, 255))
+(set: $randomGreen to (random: 0, 255))
+(set: $randomBlue to (random: 0, 255))
+(text-colour: (rgb: $randomRed, $randomGreen, $randomBlue))[YOU WIN!!!]
+]
+}
+
+You took $numOfMoves moves to complete this maze.
+
+
+(if: $numOfMoves &lt;= $HighScore_6)[
+	(set: $HighScore_6 to $numOfMoves)
+]
+(set: $hasShovel to false)(set: $prickyOnShovel to false)(set: $hasKey to false)(set: $doorUnlocked to false)
+(if: $prickyAdopted is true)[&quot;Now what am I s&#39;posed ter do wit&#39; this &#39;ere Pricky? I already have $petName wit&#39; me! Ah well... I s&#39;pose I&#39;ll just leave this extra one &#39;ere.&quot;
+
+Charles gently sets the Pricky down by the portal. It scurries off happily.](else:)[Charles gently sets the Pricky down by the portal. It scurries off happily.]
+
+[[Maze Select]]
+
+[[Main Menu]]</tw-passagedata><tw-passagedata pid="103" name="Maze 7 Intro" tags="" position="175,5150" size="100,100">&lt;h1&gt;Maze 7&lt;/h1&gt;
+&lt;img src=&quot;images/maze_7.png&quot;&gt;
+&quot;A Thiarna! A Pricky, an&#39; the shovel ter deal wit&#39; it is BEHIND a locked door! Mo chroí!&quot;
+
+(link: &quot;Start Maze&quot;)[(set: $currentDirection to &quot;up&quot;)(set: $numOfMoves to 0)(set: $hasShovel to false)(set: $prickyOnShovel to false)(set: $wildPricky to true)(set: $hasKey to false)(set: $doorUnlocked to false)(go-to: &quot;L7B5&quot;)]</tw-passagedata><tw-passagedata pid="104" name="L7B5" tags="" position="400,5600" size="100,100">(set: $numOfMoves to 0)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/start-room.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+&lt;span style=&quot;color: green;&quot;&gt;You are at the start of the maze.&lt;/span&gt;
+
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7B4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="105" name="L7B4" tags="" position="400,5500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_ne.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7B5&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L7A4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="106" name="L7A4" tags="" position="300,5500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/2way_ur.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7A3&quot;)]
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L7B4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="107" name="L7A3" tags="" position="300,5400" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7A2&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7A4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="108" name="L7A2" tags="" position="300,5300" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_nw.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L7B2&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7A3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="109" name="L7B2" tags="" position="400,5300" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+(if: $wildPricky is true)[&lt;img src=&quot;images/3way_pricky.png&quot;&gt;]
+(else:)[&lt;img src=&quot;images/3way.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)]
+&lt;/div&gt;}
+(if: $wildPricky is true)[&lt;span style=&quot;color: red;&quot;&gt;A Pricky is ahead!&lt;/span&gt;
+(if: $hasShovel is true)[
+(link: &quot;Scoop up the Pricky with the shovel&quot;)[(set: $wildPricky to false)(set: $prickyOnShovel to true)(go-to: &quot;L7B2 Scoop&quot;)]]
+
+](else:)[There is an Exit Portal ahead.
+
+](link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(if: $wildPricky is true)[(go-to: &quot;L7 Pricky Defeat&quot;)](else:)[(go-to: &quot;L7B1&quot;)]]
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L7C2&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L7A2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="110" name="L7B2 Scoop" tags="" position="300,5000" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/shovel_pricky-down.png&quot;&gt;
+&lt;/div&gt;
+Charles carefully scoops the Pricky up with his shovel. It wriggles a bit, but it can&#39;t poke him from there!
+
+[[Continue-&gt;L7B2]]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="111" name="L7 Pricky Defeat" tags="" position="200,5050" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/hallway_vert_pricky.png&quot;&gt;
+&lt;/div&gt;
+&lt;span style=&quot;color: red;&quot;&gt;CHARLES WAS DEFEATED!&lt;/span&gt;
+
+He walked right into the Pricky and got a face full of spines. Back to the start of the maze you go...
+
+(link: &quot;Return to start&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7B5&quot;)]</tw-passagedata><tw-passagedata pid="112" name="L7C2" tags="" position="500,5300" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_hori_more_floor.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L7D2&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7C3&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L7B2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="113" name="L7D2" tags="" position="600,5300" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+(if: $doorUnlocked is true)[&lt;img src=&quot;images/2way_ul.png&quot;&gt;(display: &quot;Charles Sprite&quot;)]
+(else:)[&lt;img src=&quot;images/2way_ul_door.png&quot;&gt;&lt;img src=&quot;images/up_quarter.png&quot;&gt;]
+&lt;/div&gt;}
+{(if: $doorUnlocked is true)[]
+(else:)[A locked door blocks the way ahead.(if: $hasKey is false)[ If only Charles had a key...]]}
+
+{(if: $doorUnlocked is true)[(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7D1&quot;)]]
+(else-if: $hasKey is true)[(link: &quot;Unlock the door with the key&quot;)[(set: $hasKey to false)(set: $doorUnlocked to true)(go-to: &quot;L7D2 Unlock&quot;)]]}
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L7C2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="114" name="L7D2 Unlock" tags="" position="800,5300" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/door.png&quot;&gt;
+&lt;/div&gt;
+Charles turns the key in the lock... *CLICK!* The door swings open!
+
+[[Continue-&gt;L7D2]]</tw-passagedata><tw-passagedata pid="115" name="L7D1" tags="" position="600,5200" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/dead-end.png&quot;&gt;
+(if: $hasShovel is false)[&lt;img src=&quot;images/shovel.png&quot;&gt;]
+(else:)[(display: &quot;Charles Sprite&quot;)]
+&lt;/div&gt;}
+&lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
+
+(if: $hasShovel is false)[There is a shovel stuck in the ground.
+
+(link: &quot;Pick up the shovel&quot;)[(set: $hasShovel to true)(go-to: &quot;L7D1 Shovel&quot;)]
+
+](link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7D2&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="116" name="L7D1 Shovel" tags="" position="800,5150" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/shovel.png&quot;&gt;
+&lt;/div&gt;
+You picked up a shovel! Could come in handy in a prickly situation...
+
+[[Continue-&gt;L7D1]]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="117" name="L7C3" tags="" position="500,5400" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/2way_ur.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7C2&quot;)]
+
+(link: &quot;Go right&quot;)[(set: $currentDirection to &quot;right&quot;)(go-to: &quot;L7D3&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7C4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="118" name="L7C4" tags="" position="500,5500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7C3&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7C5&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="119" name="L7C5" tags="" position="500,5600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+&lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
+
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7C4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="120" name="L7D3" tags="" position="600,5400" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/corner_ne.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7D4&quot;)]
+
+(link: &quot;Go left&quot;)[(set: $currentDirection to &quot;left&quot;)(go-to: &quot;L7C3&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="121" name="L7D4" tags="" position="600,5500" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
+(display: &quot;Charles Sprite&quot;)
+&lt;/div&gt;}
+(link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7D3&quot;)]
+
+(link: &quot;Go down&quot;)[(set: $currentDirection to &quot;down&quot;)(go-to: &quot;L7D5&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="122" name="L7D5" tags="" position="600,5600" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+{&lt;div class=&quot;scene&quot;&gt;
+&lt;img src=&quot;images/hallway_vert.png&quot;&gt;
+(if: $hasKey is false and $doorUnlocked is false)[&lt;img src=&quot;images/key.png&quot;&gt;]
+(else:)[(display: &quot;Charles Sprite&quot;)]
+&lt;/div&gt;}
+&lt;span style=&quot;color: red;&quot;&gt;DEAD END&lt;/span&gt;
+
+(if: $hasKey is false and $doorUnlocked is false)[Something shiny is lying on the ground... a key!
+
+(link: &quot;Pick up the key&quot;)[(set: $hasKey to true)(go-to: &quot;L7D5 Key&quot;)]
+
+](link: &quot;Go up&quot;)[(set: $currentDirection to &quot;up&quot;)(go-to: &quot;L7D4&quot;)]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="123" name="L7D5 Key" tags="" position="800,5600" size="100,100">&lt;div class=&quot;image-container&quot;&gt;
+	&lt;img src=&quot;images/key.png&quot;&gt;
+&lt;/div&gt;
+You picked up a key! Now, where&#39;s that door...
+
+[[Continue-&gt;L7D5]]
+
+(display: &quot;L6-7 Inventory&quot;)</tw-passagedata><tw-passagedata pid="124" name="L7B1" tags="" position="400,5200" size="100,100">(set: $numOfMoves to $numOfMoves + 1)
+&lt;div class=&quot;image-container&quot;&gt;
+  &lt;img src=&quot;images/victory.gif&quot; class=&quot;background-image&quot;&gt;
+&lt;/div&gt;
+{
+(live: 1s)[
+(set: $randomRed to (random: 0, 255))
+(set: $randomGreen to (random: 0, 255))
+(set: $randomBlue to (random: 0, 255))
+(text-colour: (rgb: $randomRed, $randomGreen, $randomBlue))[YOU WIN!!!]
+]
+}
+
+You took $numOfMoves moves to complete this maze.
+
+
+(if: $numOfMoves &lt;= $HighScore_7)[
+	(set: $HighScore_7 to $numOfMoves)
+]
+(set: $hasShovel to false)(set: $prickyOnShovel to false)(set: $hasKey to false)(set: $doorUnlocked to false)
+(if: $prickyAdopted is true)[&quot;Two Prickies in one mornin&#39;! Sorry, little one, $petName&#39;s got the job already.&quot;
+
+]Charles gently sets the Pricky down by the portal. It scurries off happily.
+
+[[Continue-&gt;Maze 7 Outro]]</tw-passagedata><tw-passagedata pid="125" name="Maze 7 Outro" tags="" position="175,5300" size="100,100">&lt;h2&gt;The Morning Jog&lt;/h2&gt;
+*Bzzzt. Bzzzt.*
+
+That sound. That familiar sound. Charles pats his coat... it&#39;s the device in his pocket.
+
+&#39;&#39;Contractor:&#39;&#39; &quot;Hello, Charles. I trust you enjoyed your morning jog?&quot;
+
+&#39;&#39;Charles:&#39;&#39; &quot;Aye. I&#39;m &#39;ere, an&#39; ready as I&#39;ll ever be.&quot;
+
+&#39;&#39;Contractor:&#39;&#39; &quot;Good. Be sure to charge your camera. You will need a great deal of battery life for your work today.&quot;
+
+*Click.* The line goes quiet.
+
+&lt;span style=&quot;color: gray;&quot;&gt;End of Episode 1 - The Morning Jog&lt;/span&gt;
+
 [[Maze Select]]
 
 [[Main Menu]]</tw-passagedata></tw-storydata>
