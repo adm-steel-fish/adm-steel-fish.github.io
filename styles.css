@@ -176,6 +176,14 @@ footer {
   margin-top: 2rem;
 }
 
+footer a {
+  color: var(--silver);
+}
+
+footer a:hover {
+  color: var(--fountain-blue);
+}
+
 nav a.nav-active {
   color: var(--fountain-blue);
 }
