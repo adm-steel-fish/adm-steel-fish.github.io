@@ -19,7 +19,7 @@ service cloud.firestore {
     match /{collection}/{docId} {
       allow read, write: if collection in ['mail_players', 'mail_friend_codes', 'mail_letters',
                                            'mail_reports', 'mail_register_ips',
-                                           'accounts', 'account_logins', 'account_sessions',
+                                           'accounts', 'account_identities', 'account_logins', 'account_sessions',
                                            'account_saves']
                          && request.auth != null
                          && request.auth.uid == 'Q6xv78gLDQgECahgg6BZtrCVl202';

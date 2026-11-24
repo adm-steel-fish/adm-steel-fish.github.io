@@ -794,3 +794,115 @@ nav a.nav-active {
     height: 160px;
   }
 }
+
+/* ── Account page ── */
+
+.account h1 {
+  margin: 0;
+}
+
+.account-note {
+  color: #45545c;
+  font-size: 0.95rem;
+}
+
+.account-message {
+  background: #e3f1ea;
+  border-left: 4px solid var(--seaweed-green);
+  padding: 0.7rem 1rem;
+  border-radius: 4px;
+  margin-top: 0;
+}
+
+.account-message.is-error {
+  background: #f7e6dc;
+  border-left-color: var(--brass);
+}
+
+.account-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.account-profile img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.account-profile .account-note {
+  margin: 0.2rem 0 0;
+}
+
+.login-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 1.2rem 0;
+}
+
+.login-btn {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.login-btn[hidden] {
+  display: none;
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.login-google {
+  background: #fff;
+  color: #1f1f1f;
+  border: 1px solid #747775;
+}
+
+.login-discord {
+  background: #5865f2;
+  color: #fff;
+}
+
+.login-unlink {
+  background: var(--silver);
+  color: var(--gunmetal);
+}
+
+.login-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.login-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #dde3e8;
+}
+
+.login-label {
+  font-weight: 600;
+  min-width: 5rem;
+}
+
+.login-detail {
+  flex: 1;
+  color: #45545c;
+  overflow-wrap: anywhere;
+}

@@ -1,4 +1,10 @@
-// Accounts for Crispy the Cat: "Log in with Discord" plus cloud saves.
+// Steel Fish Studios accounts: log in with Google or Discord, on the website or
+// in Crispy the Cat, plus cloud saves for the game.
+//
+// One account can have both a Google and a Discord login linked to it. Each
+// login (an "identity") points at its account in account_identities, so either
+// one opens the same account. Accounts made before linking existed have the id
+// "discord_<id>" and no identity document; findAccount() still finds those.
 //
 // Players without an account keep their per-browser save as before. Logging in
 // gives the game a session token; with it the game can store its save here
@@ -16,6 +22,8 @@
 //   4. Meanwhile the game polls GET /api/account/login/poll until it gets its
 //      session token.
 //
+// The website keeps its session in an HttpOnly cookie instead (see "Website").
+//
 // Data lives in Firestore next to the mail collections, under the same mail
 // server user (see mail-api.mjs and firestore.rules).
 //
@@ -24,30 +32,44 @@
 //   DISCORD_CLIENT_SECRET  Same page. Mark it as a secret.
 //   MAIL_SERVER_EMAIL, MAIL_SERVER_PASSWORD  Shared with mail-api.mjs.
 //   DISCORD_BOT_TOKEN      For supporter tiers; see netlify/lib/supporter.mjs.
-// In the Developer Portal, add this redirect: https://steelfishstudios.com/api/account/discord/callback
+//   GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+//                          Google Cloud Console (steel-fish-studios project) →
+//                          APIs & Services → Credentials → OAuth client ID,
+//                          type "Web application". Mark the secret as a secret.
+// In the Discord Developer Portal, add this redirect: https://steelfishstudios.com/api/account/discord/callback
+// In the Google OAuth client, add this redirect:    https://steelfishstudios.com/api/account/google/callback
 //
-// Endpoints for the game (JSON; the last six need the X-Session header):
+// Endpoints for the game (JSON; the ones after poll need the X-Session header):
 //   POST /api/account/login       { return_to? }  → { login_id, poll_secret, code, url, expires_in }
 //   GET  /api/account/login/poll?login=…  (X-Login-Secret header)
 //                                                 → { status: "pending" } or { status: "done", session, account }
 //   GET  /api/account/me                          → { account, save: { revision, updated_unix, summary } | null }
 //   GET  /api/account/supporter[?refresh=1]       → { tier, name, in_server, checked_unix }
-// "account" includes "supporter" in that same shape.
+// "account" includes "supporter" in that same shape, and "logins":
+// { google: { email, name } | null, discord: { username, display_name, avatar_url } | null }.
 //   GET  /api/account/save                        → { save, revision, updated_unix, summary } (save is null if none)
 //   POST /api/account/save        { save, base_revision, summary? } → { revision, updated_unix }
 //                                                   409 { revision, … } if another device saved since base_revision
 //   POST /api/account/mail        { player_id?, secret? } → { player_id, secret, friend_code, display_name } or {}
 //   POST /api/account/logout                      → { ok: true }
+//   POST /api/account/unlink      { provider }    → { account }  (only while another login stays linked)
 // Pages the player's browser visits:
 //   GET  /api/account/discord?login=…             → redirect to Discord
-//   GET  /api/account/discord/callback            → confirmation page
+//   GET  /api/account/discord/callback            → confirmation page (game) or redirect (website)
 //   POST /api/account/discord/confirm             → "you're logged in" (or back to return_to)
+//   GET  /api/account/google/callback             → redirect (website)
+// Website (the endpoints above work with the sfs_session cookie instead of
+// X-Session; POSTs must come from a page on this site):
+//   GET  /api/account/web/login/{google|discord}?return_to=…  → log in, or sign up on first visit
+//   GET  /api/account/web/link/{google|discord}?return_to=…   → add that login to this account
+//   Both come back to return_to (default /account.html) with ?auth=ok, ?auth=linked&provider=…
+//   or ?auth=error&reason=(expired|cancelled|provider|taken|has_other|login_first) added.
 
 import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
-  deleteDoc, doc, getDoc, getFirestore, runTransaction, setDoc, updateDoc,
+  deleteDoc, deleteField, doc, getDoc, getFirestore, runTransaction, setDoc, updateDoc,
 } from "firebase/firestore";
 import { supporterStatus } from "../lib/supporter.mjs";
 
@@ -63,14 +85,18 @@ const firebaseConfig = {
 
 const SITE = "https://steelfishstudios.com";
 const REDIRECT_URI = `${SITE}/api/account/discord/callback`;
+const GOOGLE_REDIRECT_URI = `${SITE}/api/account/google/callback`;
 
-const ACCOUNTS = "accounts";            // "discord_<id>" → profile + linked mail account
-const LOGINS = "account_logins";        // logins in progress
-const SESSIONS = "account_sessions";    // sha256(session token) → account id
-const SAVES = "account_saves";          // account id → save text
-const MAIL_PLAYERS = "mail_players";    // owned by mail-api.mjs
+const ACCOUNTS = "accounts";             // account id → profile + linked mail account
+const IDENTITIES = "account_identities"; // "<provider>_<provider's user id>" → account id
+const LOGINS = "account_logins";         // logins in progress
+const SESSIONS = "account_sessions";     // sha256(session token) → account id
+const SAVES = "account_saves";           // account id → save text
+const MAIL_PLAYERS = "mail_players";     // owned by mail-api.mjs
 
+const PROVIDERS = ["google", "discord"];
 const LOGIN_TTL_MS = 15 * 60 * 1000;
+const WEB_SESSION_MS = 60 * 24 * 60 * 60 * 1000; // website logins last 60 days
 const MAX_SAVE = 300_000; // characters; Firestore allows ~1 MB per document
 // Short code shown in the game and on the confirm page. Same alphabet as
 // friend codes, minus look-alikes.
@@ -101,11 +127,17 @@ const CORS_HEADERS = {
   "Cross-Origin-Resource-Policy": "cross-origin",
 };
 
-function json(body, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...CORS_HEADERS, "Content-Type": "application/json", "Cache-Control": "no-store" },
-  });
+function json(body, status = 200, cookies = []) {
+  const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json", "Cache-Control": "no-store" });
+  for (const c of cookies) headers.append("Set-Cookie", c);
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+// Response.redirect() can't carry cookies, so this builds one by hand.
+function redirect(url, cookies = []) {
+  const headers = new Headers({ Location: url, "Cache-Control": "no-store" });
+  for (const c of cookies) headers.append("Set-Cookie", c);
+  return new Response(null, { status: 303, headers });
 }
 
 function httpError(message, status) {
@@ -138,7 +170,7 @@ function shortCode() {
 const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g,
   (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
-// A small page in the site's colors for the browser half of the login.
+// A small page in the site's colors for the browser half of the game's login.
 function page(title, bodyHtml, status = 200) {
   return new Response(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -167,22 +199,33 @@ function avatarUrl(user) {
     : `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(user.id) >> 22n) % 6}.png`;
 }
 
+function displayName(data) {
+  return data.globalName || data.username || data.google?.name || "Player";
+}
+
 async function publicAccount(id, ref, data) {
   return {
     account_id: id,
-    provider: "discord",
-    discord_id: data.discordId,
-    username: data.username,
-    display_name: data.globalName || data.username,
-    avatar_url: data.avatarUrl,
+    provider: data.discordId ? "discord" : "google",
+    discord_id: data.discordId || null,
+    username: data.username || "",
+    display_name: displayName(data),
+    avatar_url: data.avatarUrl || data.google?.picture || "",
+    logins: {
+      google: data.google?.sub ? { email: data.google.email || "", name: data.google.name || "" } : null,
+      discord: data.discordId
+        ? { username: data.username, display_name: data.globalName || data.username, avatar_url: data.avatarUrl }
+        : null,
+    },
     supporter: await supporterStatus(ref, data),
   };
 }
 
 // Only pages on this site may be returned to after logging in.
 function cleanReturnTo(value) {
+  if (!value) return "";
   try {
-    const url = new URL(String(value ?? ""));
+    const url = new URL(String(value), SITE);
     return url.origin === SITE ? url.href : "";
   } catch {
     return "";
@@ -201,17 +244,220 @@ async function loadLogin(id) {
   return { ref: snap.ref, data };
 }
 
-// Returns { id, ref, data } for the session's account, or throws 401.
+// ---- Sessions ----
+
+function readCookies(req) {
+  const out = {};
+  for (const part of (req.headers.get("cookie") || "").split(";")) {
+    const i = part.indexOf("=");
+    if (i > 0) out[part.slice(0, i).trim()] = part.slice(i + 1).trim();
+  }
+  return out;
+}
+
+// sfs_session  The website's session token. HttpOnly, only sent to /api/account.
+// sfs_oauth    Ties a Google/Discord round trip to the browser that began it,
+//              so nobody can trick a visitor into logging in to someone else's
+//              account.
+// sfs_user     The display name, readable by the site's pages so the menu can
+//              say who's logged in without calling the API on every page view.
+//              It grants nothing.
+const COOKIE_FLAGS = "Secure; SameSite=Lax";
+const sessionCookie = (token) =>
+  `sfs_session=${token}; Path=/api/account; HttpOnly; ${COOKIE_FLAGS}; Max-Age=${WEB_SESSION_MS / 1000}`;
+const userCookie = (name) =>
+  `sfs_user=${encodeURIComponent(name)}; Path=/; ${COOKIE_FLAGS}; Max-Age=${WEB_SESSION_MS / 1000}`;
+const oauthCookie = (nonce) =>
+  `sfs_oauth=${nonce}; Path=/api/account; HttpOnly; ${COOKIE_FLAGS}; Max-Age=${LOGIN_TTL_MS / 1000}`;
+const CLEAR_SESSION = [
+  `sfs_session=; Path=/api/account; HttpOnly; ${COOKIE_FLAGS}; Max-Age=0`,
+  `sfs_user=; Path=/; ${COOKIE_FLAGS}; Max-Age=0`,
+];
+const CLEAR_OAUTH = `sfs_oauth=; Path=/api/account; HttpOnly; ${COOKIE_FLAGS}; Max-Age=0`;
+
+// Returns { id, ref, data, sessionRef, viaCookie } for the session's account,
+// or throws 401. The game sends X-Session; the website sends the cookie.
 async function authenticate(req) {
-  const token = req.headers.get("x-session") || "";
+  const header = req.headers.get("x-session") || "";
+  const token = header || readCookies(req).sfs_session || "";
   if (token.length < 20) throw httpError("Not logged in.", 401);
   const session = await getDoc(doc(db, SESSIONS, sha256hex(token)));
   if (!session.exists()) throw httpError("Not logged in.", 401);
+  if (session.get("kind") === "web" && Date.now() - session.get("createdMs") > WEB_SESSION_MS) {
+    await deleteDoc(session.ref);
+    throw httpError("Not logged in.", 401);
+  }
   const id = session.get("accountId");
   const ref = doc(db, ACCOUNTS, id);
   const snap = await getDoc(ref);
   if (!snap.exists()) throw httpError("Not logged in.", 401);
-  return { id, ref, data: snap.data(), sessionRef: session.ref };
+  return { id, ref, data: snap.data(), sessionRef: session.ref, viaCookie: !header };
+}
+
+// ---- Identities: which Google/Discord login opens which account ----
+
+const identityRef = (provider, providerId) => doc(db, IDENTITIES, `${provider}_${providerId}`);
+
+// The account fields each provider fills in. Discord's stay at the top level,
+// where the game and supporter.mjs already look for them.
+function providerFields(provider, p) {
+  if (provider === "discord") {
+    return { discordId: p.id, username: p.username, globalName: p.globalName, avatarUrl: p.avatarUrl };
+  }
+  return { google: { sub: p.id, email: p.email, name: p.name, picture: p.picture } };
+}
+
+function unlinkFields(provider) {
+  if (provider === "discord") {
+    return {
+      discordId: deleteField(), username: deleteField(), globalName: deleteField(),
+      avatarUrl: deleteField(), supporter: deleteField(),
+    };
+  }
+  return { google: deleteField() };
+}
+
+const linkedId = (data, provider) => (provider === "discord" ? data.discordId : data.google?.sub) || null;
+const linkedProviders = (data) => PROVIDERS.filter((p) => linkedId(data, p));
+
+// The id of the account this login opens, or null. Only reads, so it must run
+// before any writes in tx.
+async function findAccount(tx, provider, providerId) {
+  const identity = await tx.get(identityRef(provider, providerId));
+  if (identity.exists()) return identity.get("accountId");
+  if (provider === "discord") {
+    // Accounts from before linking existed.
+    const legacy = await tx.get(doc(db, ACCOUNTS, `discord_${providerId}`));
+    if (legacy.exists() && legacy.get("discordId") === providerId) return legacy.id;
+  }
+  return null;
+}
+
+// Logs in with a Google/Discord profile, making the account on first login.
+// Returns { accountId, session, data }. extra(tx, accountId, session) may add
+// writes to the same transaction.
+async function loginWith(provider, profile, { web = false, extra } = {}) {
+  const session = randomBytes(32).toString("base64url");
+  return runTransaction(db, async (tx) => {
+    const found = await findAccount(tx, provider, profile.id);
+    const accountId = found || `acct_${randomUUID()}`;
+    const accountRef = doc(db, ACCOUNTS, accountId);
+    const existing = found ? await tx.get(accountRef) : null;
+    const now = Date.now();
+    const fields = { ...providerFields(provider, profile), lastLoginMs: now };
+    let data;
+    if (existing?.exists()) {
+      tx.update(accountRef, fields);
+      data = { ...existing.data(), ...fields };
+    } else {
+      data = { ...fields, createdMs: now };
+      tx.set(accountRef, data);
+    }
+    tx.set(identityRef(provider, profile.id), { accountId, provider, providerId: profile.id, linkedMs: now });
+    tx.set(doc(db, SESSIONS, sha256hex(session)), { accountId, createdMs: now, ...(web ? { kind: "web" } : {}) });
+    extra?.(tx, accountId, session);
+    return { accountId, session, data };
+  });
+}
+
+// Adds a Google/Discord login to an account. Returns null when done, or why
+// not: "taken" (that login already opens a different account), "has_other"
+// (this account already has another login from that provider) or "gone".
+async function linkTo(accountId, provider, profile) {
+  return runTransaction(db, async (tx) => {
+    const owner = await findAccount(tx, provider, profile.id);
+    const accountRef = doc(db, ACCOUNTS, accountId);
+    const account = await tx.get(accountRef);
+    if (!account.exists()) return "gone";
+    if (owner && owner !== accountId) return "taken";
+    const current = linkedId(account.data(), provider);
+    if (current && current !== profile.id) return "has_other";
+    tx.update(accountRef, providerFields(provider, profile));
+    tx.set(identityRef(provider, profile.id), { accountId, provider, providerId: profile.id, linkedMs: Date.now() });
+    return null;
+  });
+}
+
+async function unlink(req, account) {
+  const { provider } = await readBody(req);
+  if (!PROVIDERS.includes(provider)) return json({ error: "Unknown login." }, 400);
+  const linked = linkedProviders(account.data);
+  if (!linked.includes(provider)) return json({ error: "That login isn't linked." }, 400);
+  if (linked.length < 2) {
+    return json({ error: "That's your only way to log in. Link another one first." }, 400);
+  }
+  const providerId = linkedId(account.data, provider);
+  await runTransaction(db, async (tx) => {
+    const identity = await tx.get(identityRef(provider, providerId));
+    if (identity.exists() && identity.get("accountId") === account.id) tx.delete(identity.ref);
+    tx.update(account.ref, unlinkFields(provider));
+  });
+  const snap = await getDoc(account.ref);
+  return json({ account: await publicAccount(account.id, account.ref, snap.data()) });
+}
+
+// ---- Provider profiles ----
+
+// Trades Discord's ?code= for { id, username, globalName, avatarUrl }, or null.
+async function discordProfile(code) {
+  const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env.DISCORD_CLIENT_ID,
+      client_secret: process.env.DISCORD_CLIENT_SECRET,
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: REDIRECT_URI,
+    }),
+  });
+  const token = await tokenRes.json().catch(() => ({}));
+  if (!token.access_token) {
+    console.error("Discord token exchange failed", tokenRes.status, token.error);
+    return null;
+  }
+  const userRes = await fetch("https://discord.com/api/users/@me", {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  });
+  const user = await userRes.json().catch(() => ({}));
+  if (!user.id) return null;
+  return {
+    id: String(user.id),
+    username: String(user.username ?? ""),
+    globalName: String(user.global_name ?? ""),
+    avatarUrl: avatarUrl(user),
+  };
+}
+
+// Trades Google's ?code= for { id, email, name, picture }, or null.
+async function googleProfile(code) {
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: GOOGLE_REDIRECT_URI,
+    }),
+  });
+  const token = await tokenRes.json().catch(() => ({}));
+  if (!token.access_token) {
+    console.error("Google token exchange failed", tokenRes.status, token.error);
+    return null;
+  }
+  const userRes = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+  });
+  const user = await userRes.json().catch(() => ({}));
+  if (!user.sub) return null;
+  return {
+    id: String(user.sub),
+    email: user.email_verified ? String(user.email ?? "") : "",
+    name: String(user.name ?? ""),
+    picture: String(user.picture ?? ""),
+  };
 }
 
 // ---- Login (game side) ----
@@ -241,7 +487,7 @@ async function startLogin(req) {
 async function pollLogin(req) {
   const id = new URL(req.url).searchParams.get("login");
   const login = await loadLogin(id);
-  if (!login) return json({ status: "expired" }, 404);
+  if (!login || login.data.kind === "web") return json({ status: "expired" }, 404);
   if (!sameString(sha256hex(req.headers.get("x-login-secret") || ""), login.data.pollSecretHash)) {
     return json({ error: "Not your login." }, 403);
   }
@@ -261,13 +507,14 @@ async function pollLogin(req) {
   });
 }
 
-// ---- Login (browser side) ----
+// ---- Login (game, browser side) ----
+
+const expiredPage = () =>
+  page("Link expired", "<h1>This login link has expired</h1><p>Go back to the game and try logging in again.</p>", 410);
 
 async function discordStart(req) {
   const login = await loadLogin(new URL(req.url).searchParams.get("login"));
-  if (!login || login.data.status !== "pending") {
-    return page("Link expired", "<h1>This login link has expired</h1><p>Go back to the game and try logging in again.</p>", 410);
-  }
+  if (!login || login.data.kind === "web" || login.data.status !== "pending") return expiredPage();
   const url = new URL("https://discord.com/oauth2/authorize");
   url.search = new URLSearchParams({
     client_id: process.env.DISCORD_CLIENT_ID,
@@ -279,48 +526,22 @@ async function discordStart(req) {
   return Response.redirect(url.href, 302);
 }
 
+// Discord has one redirect URL for both the game's logins and the website's.
 async function discordCallback(req) {
   const params = new URL(req.url).searchParams;
   const login = await loadLogin(params.get("state"));
-  if (!login || login.data.status !== "pending") {
-    return page("Link expired", "<h1>This login link has expired</h1><p>Go back to the game and try logging in again.</p>", 410);
-  }
+  if (login?.data.kind === "web") return webCallback(req, login, "discord");
+  if (!login || login.data.status !== "pending") return expiredPage();
   if (!params.get("code")) {
     // The player pressed Cancel on Discord's screen.
     await updateDoc(login.ref, { status: "denied" });
     return page("Cancelled", "<h1>Login cancelled</h1><p>You can close this tab.</p>");
   }
 
-  const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: process.env.DISCORD_CLIENT_ID,
-      client_secret: process.env.DISCORD_CLIENT_SECRET,
-      grant_type: "authorization_code",
-      code: params.get("code"),
-      redirect_uri: REDIRECT_URI,
-    }),
-  });
-  const token = await tokenRes.json().catch(() => ({}));
-  if (!token.access_token) {
-    console.error("Discord token exchange failed", tokenRes.status, token.error);
+  const discord = await discordProfile(params.get("code"));
+  if (!discord) {
     return page("Something went wrong", "<h1>Discord didn't let us in</h1><p>Go back to the game and try again.</p>", 502);
   }
-  const userRes = await fetch("https://discord.com/api/users/@me", {
-    headers: { Authorization: `Bearer ${token.access_token}` },
-  });
-  const user = await userRes.json().catch(() => ({}));
-  if (!user.id) {
-    return page("Something went wrong", "<h1>Couldn't read your Discord account</h1><p>Go back to the game and try again.</p>", 502);
-  }
-
-  const discord = {
-    id: String(user.id),
-    username: String(user.username ?? ""),
-    globalName: String(user.global_name ?? ""),
-    avatarUrl: avatarUrl(user),
-  };
   await updateDoc(login.ref, { status: "confirm", discord });
 
   const name = discord.globalName || discord.username;
@@ -342,7 +563,7 @@ async function discordConfirm(req) {
   const form = await req.formData().catch(() => null);
   const login = await loadLogin(form?.get("login"));
   if (!login || login.data.status !== "confirm" || !sameString(form.get("csrf"), login.data.csrf)) {
-    return page("Link expired", "<h1>This login link has expired</h1><p>Go back to the game and try logging in again.</p>", 410);
+    return expiredPage();
   }
   if (form.get("answer") !== "yes") {
     await updateDoc(login.ref, { status: "denied" });
@@ -350,23 +571,8 @@ async function discordConfirm(req) {
   }
 
   const { discord } = login.data;
-  const accountId = `discord_${discord.id}`;
-  const accountRef = doc(db, ACCOUNTS, accountId);
-  const session = randomBytes(32).toString("base64url");
-  await runTransaction(db, async (tx) => {
-    const existing = await tx.get(accountRef);
-    const profile = {
-      provider: "discord",
-      discordId: discord.id,
-      username: discord.username,
-      globalName: discord.globalName,
-      avatarUrl: discord.avatarUrl,
-      lastLoginMs: Date.now(),
-    };
-    if (existing.exists()) tx.update(accountRef, profile);
-    else tx.set(accountRef, { ...profile, createdMs: Date.now() });
-    tx.set(doc(db, SESSIONS, sha256hex(session)), { accountId, createdMs: Date.now() });
-    tx.update(login.ref, { status: "done", accountId, session });
+  await loginWith("discord", discord, {
+    extra: (tx, accountId, session) => tx.update(login.ref, { status: "done", accountId, session }),
   });
 
   if (login.data.returnTo) return Response.redirect(login.data.returnTo, 303);
@@ -376,7 +582,94 @@ async function discordConfirm(req) {
     <p>Go back to Crispy the Cat. You can close this tab.</p>`);
 }
 
-// ---- Account (game side, needs a session) ----
+// ---- Website ----
+//
+// The same Google/Discord round trip as the game's, minus the short code: the
+// browser that starts it gets an sfs_oauth cookie, and the callback only
+// finishes for that browser.
+
+function webReturn(returnTo, params) {
+  const url = new URL(returnTo || `${SITE}/account.html`);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  return url.href;
+}
+
+async function webStart(req, mode, provider) {
+  if (!PROVIDERS.includes(provider)) return json({ error: "Not found." }, 404);
+  const returnTo = cleanReturnTo(new URL(req.url).searchParams.get("return_to")) || `${SITE}/account.html`;
+  let accountId = null;
+  if (mode === "link") {
+    const account = await authenticate(req).catch(() => null);
+    if (!account) return redirect(webReturn(returnTo, { auth: "error", reason: "login_first" }));
+    accountId = account.id;
+  }
+
+  const loginId = randomUUID();
+  const nonce = randomBytes(24).toString("base64url");
+  await setDoc(doc(db, LOGINS, loginId), {
+    kind: "web", mode, provider, accountId, returnTo,
+    nonceHash: sha256hex(nonce), createdMs: Date.now(),
+  });
+
+  let url;
+  if (provider === "google") {
+    url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    url.search = new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      response_type: "code",
+      redirect_uri: GOOGLE_REDIRECT_URI,
+      scope: "openid email profile",
+      state: loginId,
+      prompt: "select_account",
+    });
+  } else {
+    url = new URL("https://discord.com/oauth2/authorize");
+    url.search = new URLSearchParams({
+      client_id: process.env.DISCORD_CLIENT_ID,
+      response_type: "code",
+      redirect_uri: REDIRECT_URI,
+      scope: "identify",
+      state: loginId,
+    });
+  }
+  return redirect(url.href, [oauthCookie(nonce)]);
+}
+
+async function googleCallback(req) {
+  const login = await loadLogin(new URL(req.url).searchParams.get("state"));
+  if (login?.data.kind !== "web") {
+    return redirect(webReturn("", { auth: "error", reason: "expired" }), [CLEAR_OAUTH]);
+  }
+  return webCallback(req, login, "google");
+}
+
+async function webCallback(req, login, provider) {
+  const params = new URL(req.url).searchParams;
+  const { mode, accountId, returnTo, nonceHash } = login.data;
+  await deleteDoc(login.ref); // single use, whatever happens next
+  const fail = (reason) => redirect(webReturn(returnTo, { auth: "error", reason }), [CLEAR_OAUTH]);
+
+  if (login.data.provider !== provider) return fail("expired");
+  if (!sameString(sha256hex(readCookies(req).sfs_oauth || ""), nonceHash)) return fail("expired");
+  if (!params.get("code")) return fail("cancelled");
+
+  const profile = provider === "google"
+    ? await googleProfile(params.get("code"))
+    : await discordProfile(params.get("code"));
+  if (!profile) return fail("provider");
+
+  if (mode === "link") {
+    const problem = await linkTo(accountId, provider, profile);
+    if (problem) return fail(problem === "gone" ? "login_first" : problem);
+    return redirect(webReturn(returnTo, { auth: "linked", provider }), [CLEAR_OAUTH]);
+  }
+
+  const { session, data } = await loginWith(provider, profile, { web: true });
+  return redirect(webReturn(returnTo, { auth: "ok" }),
+    [CLEAR_OAUTH, sessionCookie(session), userCookie(displayName(data))]);
+}
+
+// ---- Account (needs a session) ----
 
 function saveMeta(snap) {
   if (!snap.exists()) return null;
@@ -389,7 +682,11 @@ function saveMeta(snap) {
 
 async function me(account) {
   const save = await getDoc(doc(db, SAVES, account.id));
-  return json({ account: await publicAccount(account.id, account.ref, account.data), save: saveMeta(save) });
+  return json(
+    { account: await publicAccount(account.id, account.ref, account.data), save: saveMeta(save) },
+    200,
+    account.viaCookie ? [userCookie(displayName(account.data))] : [],
+  );
 }
 
 // With ?refresh=1, asks Discord again (at most once a minute), e.g. right
@@ -474,7 +771,7 @@ async function linkMail(req, account) {
 
 async function logout(account) {
   await deleteDoc(account.sessionRef);
-  return json({ ok: true });
+  return json({ ok: true }, 200, account.viaCookie ? CLEAR_SESSION : []);
 }
 
 // ---- Routing ----
@@ -488,14 +785,20 @@ export default async (req) => {
 
   const path = new URL(req.url).pathname.replace(/^\/api\/account\/?/, "").replace(/\/$/, "");
   const route = `${req.method} ${path}`;
+  if (/(^|\/)google(\/|$)/.test(path) && !(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) {
+    return json({ error: "Google login isn't configured yet (missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET)." }, 500);
+  }
   try {
     await signIn();
+    const web = path.match(/^web\/(login|link)\/([a-z]+)$/);
+    if (req.method === "GET" && web) return await webStart(req, web[1], web[2]);
     switch (route) {
       case "POST login": return await startLogin(req);
       case "GET login/poll": return await pollLogin(req);
       case "GET discord": return await discordStart(req);
       case "GET discord/callback": return await discordCallback(req);
       case "POST discord/confirm": return await discordConfirm(req);
+      case "GET google/callback": return await googleCallback(req);
     }
     const routes = {
       "GET me": (account) => me(account),
@@ -504,9 +807,16 @@ export default async (req) => {
       "POST save": (account) => putSave(req, account),
       "POST mail": (account) => linkMail(req, account),
       "POST logout": (account) => logout(account),
+      "POST unlink": (account) => unlink(req, account),
     };
     if (!routes[route]) return json({ error: "Not found." }, 404);
-    return await routes[route](await authenticate(req));
+    const account = await authenticate(req);
+    // Browsers attach the cookie to requests other sites trigger too, so only
+    // this site's own pages may change anything with it.
+    if (req.method === "POST" && account.viaCookie && req.headers.get("origin") !== SITE) {
+      return json({ error: "Not allowed from here." }, 403);
+    }
+    return await routes[route](account);
   } catch (err) {
     if (err.status && err.status < 500) return json({ error: err.message }, err.status);
     console.error(err);

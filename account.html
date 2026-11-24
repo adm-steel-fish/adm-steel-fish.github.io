@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Account — Steel Fish Studios</title>
+  <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+  <meta name="robots" content="noindex">
+</head>
+<body>
+  <header>
+    <div class="logo">STEEL FISH STUDIOS</div>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./games.html">Games</a>
+      <a href="./about.html">About</a>
+      <a href="./news.html">News</a>
+      <a href="https://linktr.ee/steelfishstudiosllc">Contact</a>
+      <a href="./account.html" id="nav-account" class="nav-active">Log in</a>
+    </nav>
+  </header>
+  <main>
+    <section class="about account">
+      <p id="account-message" class="account-message" hidden></p>
+
+      <div id="account-loading">Loading…</div>
+
+      <div id="account-logged-out" hidden>
+        <h1>Log in</h1>
+        <p>Log in to keep your game progress in the cloud and pick it up on any device. If you don't have an account yet, logging in makes one.</p>
+        <div class="login-buttons">
+          <a class="login-btn login-google" href="/api/account/web/login/google">Log in with Google</a>
+          <a class="login-btn login-discord" href="/api/account/web/login/discord">Log in with Discord</a>
+        </div>
+        <p class="account-note">Already have an account with one of them? Log in with that one first, then link the other below so either works.</p>
+      </div>
+
+      <div id="account-logged-in" hidden>
+        <div class="account-profile">
+          <img id="account-avatar" alt="" hidden>
+          <div>
+            <h1 id="account-name"></h1>
+            <p id="account-supporter" class="account-note" hidden></p>
+          </div>
+        </div>
+
+        <h2>Ways to log in</h2>
+        <p class="account-note">Link both to log in to this same account with either one.</p>
+        <ul class="login-list">
+          <li data-provider="google">
+            <span class="login-label">Google</span>
+            <span class="login-detail"></span>
+            <a class="login-btn login-google" data-action="link" href="/api/account/web/link/google">Link Google</a>
+            <button type="button" class="login-btn login-unlink" data-action="unlink">Unlink</button>
+          </li>
+          <li data-provider="discord">
+            <span class="login-label">Discord</span>
+            <span class="login-detail"></span>
+            <a class="login-btn login-discord" data-action="link" href="/api/account/web/link/discord">Link Discord</a>
+            <button type="button" class="login-btn login-unlink" data-action="unlink">Unlink</button>
+          </li>
+        </ul>
+
+        <p><button type="button" id="account-logout" class="login-btn login-unlink">Log out</button></p>
+      </div>
+    </section>
+  </main>
+  <footer>
+    &copy; <span id="copyright-year"></span> Steel Fish Studios. All rights reserved.
+  </footer>
+  <script>document.getElementById('copyright-year').textContent = new Date().getFullYear();</script>
+  <script src="account-nav.js"></script>
+  <script src="account.js"></script>
+</body>
+</html>
