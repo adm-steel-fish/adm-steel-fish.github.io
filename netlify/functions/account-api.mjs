@@ -15,7 +15,7 @@
 // it too), much like signing in to a TV app:
 //   1. The game asks for a login: POST /api/account/login. It gets a login id,
 //      a poll secret only it knows, a short code to show the player, and a URL.
-//   2. The player opens the URL, which sends them to Discord to approve.
+//   2. The player opens the URL, which sends them to Google or Discord to approve.
 //   3. Back here, the page shows the same short code and asks the player to
 //      confirm. This stops someone from sending a player a login link that
 //      would sign the sender's game in to the player's account.
@@ -40,7 +40,7 @@
 // In the Google OAuth client, add this redirect:    https://steelfishstudios.com/api/account/google/callback
 //
 // Endpoints for the game (JSON; the ones after poll need the X-Session header):
-//   POST /api/account/login       { return_to? }  → { login_id, poll_secret, code, url, expires_in }
+//   POST /api/account/login       { provider?, return_to? } → { login_id, poll_secret, code, url, expires_in }
 //   GET  /api/account/login/poll?login=…  (X-Login-Secret header)
 //                                                 → { status: "pending" } or { status: "done", session, account }
 //   GET  /api/account/me                          → { account, save: { revision, updated_unix, summary } | null }
@@ -56,10 +56,9 @@
 //   POST /api/account/logout                      → { ok: true }
 //   POST /api/account/unlink      { provider }    → { account }  (only while another login stays linked)
 // Pages the player's browser visits:
-//   GET  /api/account/discord?login=…             → redirect to Discord
-//   GET  /api/account/discord/callback            → confirmation page (game) or redirect (website)
-//   POST /api/account/discord/confirm             → "you're logged in" (or back to return_to)
-//   GET  /api/account/google/callback             → redirect (website)
+//   GET  /api/account/{google|discord}?login=…    → redirect to Google or Discord
+//   GET  /api/account/{google|discord}/callback   → confirmation page (game) or redirect (website)
+//   POST /api/account/confirm                     → "you're logged in" (or back to return_to)
 // Website (the endpoints above work with the sfs_session cookie instead of
 // X-Session; POSTs must come from a page on this site):
 //   GET  /api/account/web/login/{google|discord}?return_to=…  → log in, or sign up on first visit
@@ -464,8 +463,14 @@ async function googleProfile(code) {
 
 // ---- Login (game side) ----
 
+// body.provider picks "google" or "discord". Game builds from before Google
+// existed send none, and get Discord as they always have.
 async function startLogin(req) {
   const body = await readBody(req);
+  const provider = body.provider === "google" ? "google" : "discord";
+  if (provider === "google" && !(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) {
+    return json({ error: "Logging in with Google isn't available yet. Please use Discord." }, 503);
+  }
   const loginId = randomUUID();
   const pollSecret = randomBytes(32).toString("base64url");
   const code = shortCode();
@@ -481,7 +486,7 @@ async function startLogin(req) {
     login_id: loginId,
     poll_secret: pollSecret,
     code,
-    url: `${SITE}/api/account/discord?login=${loginId}`,
+    url: `${SITE}/api/account/${provider}?login=${loginId}`,
     expires_in: LOGIN_TTL_MS / 1000,
   });
 }
@@ -514,45 +519,73 @@ async function pollLogin(req) {
 const expiredPage = () =>
   page("Link expired", "<h1>This login link has expired</h1><p>Go back to the game and try logging in again.</p>", 410);
 
-async function discordStart(req) {
-  const login = await loadLogin(new URL(req.url).searchParams.get("login"));
-  if (!login || login.data.kind === "web" || login.data.status !== "pending") return expiredPage();
-  const url = new URL("https://discord.com/oauth2/authorize");
-  url.search = new URLSearchParams({
-    client_id: process.env.DISCORD_CLIENT_ID,
-    response_type: "code",
-    redirect_uri: REDIRECT_URI,
-    scope: "identify",
-    state: login.ref.id,
-  });
-  return Response.redirect(url.href, 302);
+const PROVIDER_NAMES = { google: "Google", discord: "Discord" };
+
+// Where the player approves the login on Google's or Discord's own site.
+function authorizeUrl(provider, state) {
+  const url = provider === "google"
+    ? new URL("https://accounts.google.com/o/oauth2/v2/auth")
+    : new URL("https://discord.com/oauth2/authorize");
+  url.search = new URLSearchParams(provider === "google"
+    ? {
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      response_type: "code",
+      redirect_uri: GOOGLE_REDIRECT_URI,
+      scope: "openid email profile",
+      state,
+      prompt: "select_account",
+    }
+    : {
+      client_id: process.env.DISCORD_CLIENT_ID,
+      response_type: "code",
+      redirect_uri: REDIRECT_URI,
+      scope: "identify",
+      state,
+    });
+  return url.href;
 }
 
-// Discord has one redirect URL for both the game's logins and the website's.
-async function discordCallback(req) {
+const profileName = (provider, p) =>
+  provider === "google" ? p.name || p.email || "your Google account" : p.globalName || p.username;
+const profilePicture = (provider, p) => (provider === "google" ? p.picture : p.avatarUrl);
+
+function avatarImg(src) {
+  return src ? `<img src="${escapeHtml(src)}" alt="" referrerpolicy="no-referrer">` : "";
+}
+
+// GET /api/account/{google|discord}?login=… : the link the game opens.
+async function gameStart(req, provider) {
+  const login = await loadLogin(new URL(req.url).searchParams.get("login"));
+  if (!login || login.data.kind === "web" || login.data.status !== "pending") return expiredPage();
+  return Response.redirect(authorizeUrl(provider, login.ref.id), 302);
+}
+
+// Back from Google/Discord during a game login: ask the player to check the
+// code before the game gets the account.
+async function gameCallback(req, login, provider) {
   const params = new URL(req.url).searchParams;
-  const login = await loadLogin(params.get("state"));
-  if (login?.data.kind === "web") return webCallback(req, login, "discord");
-  if (!login || login.data.status !== "pending") return expiredPage();
+  if (login.data.status !== "pending") return expiredPage();
+  const name = PROVIDER_NAMES[provider];
   if (!params.get("code")) {
-    // The player pressed Cancel on Discord's screen.
+    // The player pressed Cancel on Google's or Discord's screen.
     await updateDoc(login.ref, { status: "denied" });
     return page("Cancelled", "<h1>Login cancelled</h1><p>You can close this tab.</p>");
   }
 
-  const discord = await discordProfile(params.get("code"));
-  if (!discord) {
-    return page("Something went wrong", "<h1>Discord didn't let us in</h1><p>Go back to the game and try again.</p>", 502);
+  const profile = provider === "google"
+    ? await googleProfile(params.get("code"))
+    : await discordProfile(params.get("code"));
+  if (!profile) {
+    return page("Something went wrong", `<h1>${name} didn't let us in</h1><p>Go back to the game and try again.</p>`, 502);
   }
-  await updateDoc(login.ref, { status: "confirm", discord });
+  await updateDoc(login.ref, { status: "confirm", provider, profile });
 
-  const name = discord.globalName || discord.username;
   return page("Confirm login", `
-    <img src="${escapeHtml(discord.avatarUrl)}" alt="">
-    <h1>Log in as ${escapeHtml(name)}?</h1>
+    ${avatarImg(profilePicture(provider, profile))}
+    <h1>Log in as ${escapeHtml(profileName(provider, profile))}?</h1>
     <p>Only continue if Crispy the Cat is showing this code:</p>
     <div class="code">${escapeHtml(login.data.code)}</div>
-    <form method="post" action="/api/account/discord/confirm">
+    <form method="post" action="/api/account/confirm">
       <input type="hidden" name="login" value="${escapeHtml(login.ref.id)}">
       <input type="hidden" name="csrf" value="${escapeHtml(login.data.csrf)}">
       <button class="yes" name="answer" value="yes">Yes, log in</button>
@@ -561,7 +594,22 @@ async function discordCallback(req) {
     <p class="small">If you didn't start this login, press No.</p>`);
 }
 
-async function discordConfirm(req) {
+// Google and Discord each have one redirect URL, shared by the game's logins
+// and the website's.
+async function providerCallback(req, provider) {
+  const login = await loadLogin(new URL(req.url).searchParams.get("state"));
+  if (login?.data.kind === "web") return webCallback(req, login, provider);
+  if (!login) {
+    if (provider === "google") {
+      // Most Google logins come from the website, so send expired ones back there.
+      return redirect(webReturn("", { auth: "error", reason: "expired" }), [CLEAR_OAUTH]);
+    }
+    return expiredPage();
+  }
+  return gameCallback(req, login, provider);
+}
+
+async function gameConfirm(req) {
   const form = await req.formData().catch(() => null);
   const login = await loadLogin(form?.get("login"));
   if (!login || login.data.status !== "confirm" || !sameString(form.get("csrf"), login.data.csrf)) {
@@ -572,14 +620,16 @@ async function discordConfirm(req) {
     return page("Cancelled", "<h1>Login cancelled</h1><p>You can close this tab.</p>");
   }
 
-  const { discord } = login.data;
-  await loginWith("discord", discord, {
+  // Logins started before Google existed kept the profile under "discord".
+  const provider = login.data.provider || "discord";
+  const profile = login.data.profile || login.data.discord;
+  await loginWith(provider, profile, {
     extra: (tx, accountId, session) => tx.update(login.ref, { status: "done", accountId, session }),
   });
 
   if (login.data.returnTo) return Response.redirect(login.data.returnTo, 303);
   return page("Logged in", `
-    <img src="${escapeHtml(discord.avatarUrl)}" alt="">
+    ${avatarImg(profilePicture(provider, profile))}
     <h1>You're logged in!</h1>
     <p>Go back to Crispy the Cat. You can close this tab.</p>`);
 }
@@ -613,36 +663,7 @@ async function webStart(req, mode, provider) {
     nonceHash: sha256hex(nonce), createdMs: Date.now(),
   });
 
-  let url;
-  if (provider === "google") {
-    url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-    url.search = new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID,
-      response_type: "code",
-      redirect_uri: GOOGLE_REDIRECT_URI,
-      scope: "openid email profile",
-      state: loginId,
-      prompt: "select_account",
-    });
-  } else {
-    url = new URL("https://discord.com/oauth2/authorize");
-    url.search = new URLSearchParams({
-      client_id: process.env.DISCORD_CLIENT_ID,
-      response_type: "code",
-      redirect_uri: REDIRECT_URI,
-      scope: "identify",
-      state: loginId,
-    });
-  }
-  return redirect(url.href, [oauthCookie(nonce)]);
-}
-
-async function googleCallback(req) {
-  const login = await loadLogin(new URL(req.url).searchParams.get("state"));
-  if (login?.data.kind !== "web") {
-    return redirect(webReturn("", { auth: "error", reason: "expired" }), [CLEAR_OAUTH]);
-  }
-  return webCallback(req, login, "google");
+  return redirect(authorizeUrl(provider, loginId), [oauthCookie(nonce)]);
 }
 
 async function webCallback(req, login, provider) {
@@ -806,10 +827,12 @@ export default async (req) => {
     switch (route) {
       case "POST login": return await startLogin(req);
       case "GET login/poll": return await pollLogin(req);
-      case "GET discord": return await discordStart(req);
-      case "GET discord/callback": return await discordCallback(req);
-      case "POST discord/confirm": return await discordConfirm(req);
-      case "GET google/callback": return await googleCallback(req);
+      case "GET discord": return await gameStart(req, "discord");
+      case "GET google": return await gameStart(req, "google");
+      case "GET discord/callback": return await providerCallback(req, "discord");
+      case "POST confirm":
+      case "POST discord/confirm": return await gameConfirm(req); // the old address, for pages already open
+      case "GET google/callback": return await providerCallback(req, "google");
     }
     const routes = {
       "GET me": (account) => me(account),
