@@ -47,6 +47,8 @@
 //   GET  /api/account/supporter[?refresh=1]       → { tier, name, in_server, checked_unix }
 // "account" includes "supporter" in that same shape, and "logins":
 // { google: { email, name } | null, discord: { username, display_name, avatar_url } | null }.
+// The two save endpoints take ?game=<id> for games other than Crispy the Cat
+// (e.g. ?game=photomaze); each game keeps its own save.
 //   GET  /api/account/save                        → { save, revision, updated_unix, summary } (save is null if none)
 //   POST /api/account/save        { save, base_revision, summary? } → { revision, updated_unix }
 //                                                   409 { revision, … } if another device saved since base_revision
@@ -91,7 +93,7 @@ const ACCOUNTS = "accounts";             // account id → profile + linked mail
 const IDENTITIES = "account_identities"; // "<provider>_<provider's user id>" → account id
 const LOGINS = "account_logins";         // logins in progress
 const SESSIONS = "account_sessions";     // sha256(session token) → account id
-const SAVES = "account_saves";           // account id → save text
+const SAVES = "account_saves";           // account id (Crispy) or "<account id>__<game>" → save text
 const MAIL_PLAYERS = "mail_players";     // owned by mail-api.mjs
 
 const PROVIDERS = ["google", "discord"];
@@ -696,8 +698,17 @@ async function supporter(req, account) {
   return json(await supporterStatus(account.ref, account.data, { force }));
 }
 
-async function getSave(account) {
-  const snap = await getDoc(doc(db, SAVES, account.id));
+// Each game has its own save, picked with ?game=<id>. Crispy the Cat's came
+// first and has no id: it lives under the bare account id.
+function saveRef(req, account) {
+  const game = new URL(req.url).searchParams.get("game") || "";
+  if (!game) return doc(db, SAVES, account.id);
+  if (!/^[a-z0-9-]{1,32}$/.test(game)) throw httpError("Unknown game.", 400);
+  return doc(db, SAVES, `${account.id}__${game}`);
+}
+
+async function getSave(req, account) {
+  const snap = await getDoc(saveRef(req, account));
   if (!snap.exists()) return json({ save: null, revision: 0, updated_unix: 0, summary: {} });
   return json({ save: snap.get("data"), ...saveMeta(snap) });
 }
@@ -720,7 +731,7 @@ async function putSave(req, account) {
   if (typeof body.save !== "string" || !body.save) return json({ error: "No save sent." }, 400);
   if (body.save.length > MAX_SAVE) return json({ error: "That save is too big." }, 413);
   const base = Number(body.base_revision) || 0;
-  const ref = doc(db, SAVES, account.id);
+  const ref = saveRef(req, account);
 
   const result = await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
@@ -803,7 +814,7 @@ export default async (req) => {
     const routes = {
       "GET me": (account) => me(account),
       "GET supporter": (account) => supporter(req, account),
-      "GET save": (account) => getSave(account),
+      "GET save": (account) => getSave(req, account),
       "POST save": (account) => putSave(req, account),
       "POST mail": (account) => linkMail(req, account),
       "POST logout": (account) => logout(account),

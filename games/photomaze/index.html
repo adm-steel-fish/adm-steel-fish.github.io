@@ -82,17 +82,28 @@ img {
   max-height: none;
 }
 
+/* Cloud save status line (filled in by cloud-save.js) */
+.cloud-status {
+  font-size: 0.8em;
+  opacity: 0.75;
+}
+
+.cloud-status a {
+  color: inherit;
+}
 
 
 
 
 
-</style><script role="script" id="twine-user-script" type="text/twine-javascript"></script><tw-passagedata pid="1" name="Main Menu" tags="" position="100,1225" size="100,100">&lt;h1&gt;Photomaze&lt;/h1&gt;
+
+</style><script role="script" id="twine-user-script" type="text/twine-javascript">// Cloud saves for logged-in players; see cloud-save.js.
+(function () { var s = document.createElement('script'); s.src = '/games/photomaze/cloud-save.js'; document.head.appendChild(s); })();</script><tw-passagedata pid="1" name="Main Menu" tags="" position="100,1225" size="100,100">&lt;h1&gt;Photomaze&lt;/h1&gt;
 &lt;img src=&quot;images/full_size_portrait.jpg&quot;&gt;
 &lt;h2&gt;Starring Charles Sullivan&lt;/h2&gt;
 [[New Game-&gt;Maze 1 Intro]] 
 
-(link: &quot;Load Game&quot;)[(load-game: &quot;Game File&quot;)] 
+(link: &quot;Load Game&quot;)[(load-game: &quot;Game File&quot;)] &lt;div class=&quot;cloud-status&quot;&gt;&lt;/div&gt;
 
 [[Story]]
 
@@ -261,7 +272,7 @@ You took $numOfMoves moves to complete this maze.
 (set: $prickyAdopted to false)
 (set: $petName to &quot;Prickles&quot;)
 }</tw-passagedata><tw-passagedata pid="15" name="Maze Select" tags="" position="750,1225" size="100,100">&lt;h2&gt;Maze Select&lt;/h2&gt;
-&lt;h3&gt;Misc.&lt;/h3&gt;(link:&quot;Save Game&quot;)[(save-game: &quot;Game File&quot;)] &lt;!-- Save a game file. Kept on the heading's line: in Harlowe every line break renders as a gap. --&gt;
+&lt;h3&gt;Misc.&lt;/h3&gt;(link:&quot;Save Game&quot;)[(save-game: &quot;Game File&quot;)] &lt;div class=&quot;cloud-status&quot;&gt;&lt;/div&gt;&lt;!-- Save a game file. Kept on the heading's line: in Harlowe every line break renders as a gap. --&gt;
 [[Main Menu]]
 (if: $prickyAdopted is true)[(link: &quot;Visit &quot; + $petName)[(go-to: &quot;Pricky Pet&quot;)]]
 &lt;/br&gt;
