@@ -40,7 +40,8 @@
 // In the Google OAuth client, add this redirect:    https://steelfishstudios.com/api/account/google/callback
 //
 // Endpoints for the game (JSON; the ones after poll need the X-Session header):
-//   POST /api/account/login       { provider?, return_to? } → { login_id, poll_secret, code, url, expires_in }
+//   POST /api/account/login       { provider?, return_to?, game? } → { login_id, poll_secret, code, url, expires_in }
+//                                                   game (e.g. "jelly-fight") names the game on the login pages
 //   GET  /api/account/login/poll?login=…  (X-Login-Secret header)
 //                                                 → { status: "pending" } or { status: "done", session, account }
 //   GET  /api/account/me                          → { account, save: { revision, updated_unix, summary } | null }
@@ -54,6 +55,10 @@
 //                                                   409 { revision, … } if another device saved since base_revision
 //   POST /api/account/mail        { player_id?, secret? } → { player_id, secret, friend_code, display_name } or {}
 //   POST /api/account/logout                      → { ok: true }
+// Leaderboards, one per game in LEADERBOARD_GAMES (?game=<id>). Both need a
+// login: only account holders can publish a score or see the board.
+//   GET  /api/account/leaderboard[?limit=20]      → { scores: [{ rank, name, score, mine }], me: { rank, name, score } | null }
+//   POST /api/account/leaderboard { name, score } → { name, score, improved }  (keeps the account's best score)
 //   POST /api/account/unlink      { provider }    → { account }  (only while another login stays linked)
 // Pages the player's browser visits:
 //   GET  /api/account/{google|discord}?login=…    → redirect to Google or Discord
@@ -70,9 +75,11 @@ import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypt
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import {
-  deleteDoc, deleteField, doc, getDoc, getFirestore, runTransaction, setDoc, updateDoc,
+  collection, deleteDoc, deleteField, doc, getCountFromServer, getDoc, getDocs, getFirestore,
+  limit, orderBy, query, runTransaction, setDoc, updateDoc, where,
 } from "firebase/firestore";
 import { supporterStatus } from "../lib/supporter.mjs";
+import { findBlockedWord } from "../lib/mail-word-filter.mjs";
 
 // Same public web config as news-article.js.
 const firebaseConfig = {
@@ -94,6 +101,17 @@ const LOGINS = "account_logins";         // logins in progress
 const SESSIONS = "account_sessions";     // sha256(session token) → account id
 const SAVES = "account_saves";           // account id (Crispy) or "<account id>__<game>" → save text
 const MAIL_PLAYERS = "mail_players";     // owned by mail-api.mjs
+const LEADERBOARDS = "leaderboards";     // leaderboards/<game>/scores/<account id> → name + best score
+
+// Games with a leaderboard. maxScore turns away scores no run could reach;
+// the game itself reports its score, so this is the only check there is.
+const LEADERBOARD_GAMES = {
+  "jelly-fight": { maxScore: 9_999_999 },
+};
+const BOARD_NAME_MAX = 12;
+// What the login pages call the game that asked for the login.
+const GAME_NAMES = { "jelly-fight": "Jelly Fight!" };
+const DEFAULT_GAME_NAME = "Crispy the Cat";
 
 const PROVIDERS = ["google", "discord"];
 const LOGIN_TTL_MS = 15 * 60 * 1000;
@@ -176,7 +194,7 @@ function page(title, bodyHtml, status = 200) {
   return new Response(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(title)} - Crispy the Cat</title>
+<title>${escapeHtml(title)} - Steel Fish Studios</title>
 <style>
   body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #3a6479;
          color: #f2f2f2; font: 18px/1.5 system-ui, sans-serif; padding: 16px; box-sizing: border-box; }
@@ -481,6 +499,7 @@ async function startLogin(req) {
     createdMs: Date.now(),
     returnTo: cleanReturnTo(body.return_to),
     csrf: randomBytes(16).toString("base64url"),
+    ...(Object.hasOwn(GAME_NAMES, body.game) ? { game: body.game } : {}),
   });
   return json({
     login_id: loginId,
@@ -520,6 +539,9 @@ const expiredPage = () =>
   page("Link expired", "<h1>This login link has expired</h1><p>Go back to the game and try logging in again.</p>", 410);
 
 const PROVIDER_NAMES = { google: "Google", discord: "Discord" };
+
+// The game a login was started from, for the pages the player reads.
+const loginGameName = (login) => GAME_NAMES[login.data.game] || DEFAULT_GAME_NAME;
 
 // Where the player approves the login on Google's or Discord's own site.
 function authorizeUrl(provider, state) {
@@ -583,7 +605,7 @@ async function gameCallback(req, login, provider) {
   return page("Confirm login", `
     ${avatarImg(profilePicture(provider, profile))}
     <h1>Log in as ${escapeHtml(profileName(provider, profile))}?</h1>
-    <p>Only continue if Crispy the Cat is showing this code:</p>
+    <p>Only continue if ${escapeHtml(loginGameName(login))} is showing this code:</p>
     <div class="code">${escapeHtml(login.data.code)}</div>
     <form method="post" action="/api/account/confirm">
       <input type="hidden" name="login" value="${escapeHtml(login.ref.id)}">
@@ -631,7 +653,7 @@ async function gameConfirm(req) {
   return page("Logged in", `
     ${avatarImg(profilePicture(provider, profile))}
     <h1>You're logged in!</h1>
-    <p>Go back to Crispy the Cat. You can close this tab.</p>`);
+    <p>Go back to ${escapeHtml(loginGameName(login))}. You can close this tab.</p>`);
 }
 
 // ---- Website ----
@@ -801,6 +823,84 @@ async function linkMail(req, account) {
   });
 }
 
+// ---- Leaderboards ----
+
+function leaderboardGame(req) {
+  const game = new URL(req.url).searchParams.get("game") || "";
+  if (!Object.hasOwn(LEADERBOARD_GAMES, game)) throw httpError("Unknown game.", 400);
+  return game;
+}
+
+const boardScores = (game) => collection(db, LEADERBOARDS, game, "scores");
+
+// Names are drawn with the games' own pixel letters, so only what those can
+// show is kept: lower case letters, digits, spaces and hyphens. Jelly Fight!
+// cleans names the same way (PersonalLeaderboard.clean_name).
+function cleanBoardName(value) {
+  return String(value ?? "").toLowerCase().replace(/[^a-z0-9 -]/g, "").replace(/ +/g, " ")
+    .trim().slice(0, BOARD_NAME_MAX).trim();
+}
+
+// Players ahead of this score, plus one. Null if the count can't be had.
+async function boardRank(game, score) {
+  try {
+    const ahead = await getCountFromServer(query(boardScores(game), where("score", ">", score)));
+    return ahead.data().count + 1;
+  } catch (err) {
+    console.error("Leaderboard rank failed", err);
+    return null;
+  }
+}
+
+async function getLeaderboard(req, account) {
+  const game = leaderboardGame(req);
+  const asked = Math.floor(Number(new URL(req.url).searchParams.get("limit"))) || 20;
+  const top = await getDocs(query(boardScores(game), orderBy("score", "desc"), limit(Math.min(Math.max(asked, 1), 100))));
+  const scores = top.docs.map((d, i) => ({
+    rank: i + 1, name: d.get("name"), score: d.get("score"), mine: d.id === account.id,
+  }));
+
+  let me = scores.find((s) => s.mine) || null;
+  if (me) {
+    me = { rank: me.rank, name: me.name, score: me.score };
+  } else {
+    const own = await getDoc(doc(boardScores(game), account.id));
+    if (own.exists()) {
+      me = { rank: await boardRank(game, own.get("score")), name: own.get("name"), score: own.get("score") };
+    }
+  }
+  return json({ scores, me });
+}
+
+// One entry per account, holding its best score. A lower score changes
+// nothing but the name.
+async function postLeaderboard(req, account) {
+  const game = leaderboardGame(req);
+  const body = await readBody(req);
+  const score = body.score;
+  if (!Number.isInteger(score) || score < 1 || score > LEADERBOARD_GAMES[game].maxScore) {
+    return json({ error: "That score can't be submitted." }, 400);
+  }
+
+  let name = cleanBoardName(body.name);
+  if (name && findBlockedWord(name)) return json({ error: "Please pick another name." }, 400);
+  if (!name) {
+    name = cleanBoardName(displayName(account.data));
+    if (!name || findBlockedWord(name)) name = "player";
+  }
+
+  const ref = doc(boardScores(game), account.id);
+  const result = await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    const previous = snap.exists() ? snap.get("score") : 0;
+    const improved = score > previous;
+    const best = Math.max(score, previous);
+    tx.set(ref, { name, score: best, updatedMs: Date.now() });
+    return { name, score: best, improved };
+  });
+  return json(result);
+}
+
 async function logout(account) {
   await deleteDoc(account.sessionRef);
   return json({ ok: true }, 200, account.viaCookie ? CLEAR_SESSION : []);
@@ -841,6 +941,8 @@ export default async (req) => {
       "POST save": (account) => putSave(req, account),
       "POST mail": (account) => linkMail(req, account),
       "POST logout": (account) => logout(account),
+      "GET leaderboard": (account) => getLeaderboard(req, account),
+      "POST leaderboard": (account) => postLeaderboard(req, account),
       "POST unlink": (account) => unlink(req, account),
     };
     if (!routes[route]) return json({ error: "Not found." }, 404);
